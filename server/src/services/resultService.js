@@ -3,9 +3,11 @@ const { Attempt, Question } = require('../models');
 const examService = require('./examService');
 const AppError = require('../utils/AppError');
 const { writeAuditLog } = require('./auditService');
+const { sweepOverdueAttempts } = require('./deadlineSweepService');
 
 async function listResults(tenant, examId, { status } = {}) {
   await examService.getExam(tenant, examId);
+  await sweepOverdueAttempts(examId);
   const filter = { exam: examId };
   if (status) filter.status = status;
   else filter.status = { $in: ['submitted', 'graded'] };

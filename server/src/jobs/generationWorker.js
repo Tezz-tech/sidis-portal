@@ -6,12 +6,21 @@ const pricingService = require('../services/pricingService');
 const emailService = require('../services/emailService');
 const logger = require('../config/logger');
 
+// Steps before this point have made no database writes yet, so a stuck job
+// at one of these steps (e.g. the Vercel function that was running it got
+// killed by its execution time limit) is safe to simply retry from scratch.
+// Once a job reaches 'checking' it's about to (or already did) insert
+// questions — retrying past that point risks duplicate inserts, so a job
+// stuck there instead gets marked failed (with its reservation released)
+// rather than re-run; the creator can just click Generate again.
+const RETRYABLE_STEPS = new Set(['queued', 'reading', 'understanding', 'writing']);
+
 function buildTenant(data) {
   return { organizationId: data.organizationId, userId: data.requestedBy, role: 'creator' };
 }
 
 async function updateProgress(job, progress) {
-  job.attrs.data.progress = progress;
+  job.attrs.data.progress = { ...progress, updatedAt: new Date().toISOString() };
   await job.save();
 }
 
@@ -115,17 +124,39 @@ async function process(job) {
   await updateProgress(job, { step: 'done', percent: 100 });
 }
 
+/**
+ * Runs a generation job directly — used both by the persistent-worker path
+ * (defineGenerationJob, for a Render-style deployment) and by the inline
+ * serverless path (see services/generationJobService.js), which calls this
+ * the moment a job is created instead of waiting for a separate worker
+ * process to pick it up.
+ */
+async function runGenerationJobNow(job) {
+  job.attrs.lastRunAt = new Date();
+  await job.save();
+
+  try {
+    await process(job);
+    job.attrs.lastFinishedAt = new Date();
+    await job.save();
+  } catch (err) {
+    await releaseFullReservation(job.attrs.data);
+    job.attrs.failReason = err.message;
+    job.attrs.lastFinishedAt = new Date();
+    await job.save();
+    logger.error({ err, jobId: job.attrs._id?.toString() }, 'Generation job failed');
+  }
+}
+
 function defineGenerationJob(agenda) {
   agenda.define('generate-questions', { concurrency: 3 }, async (job) => {
     try {
       await process(job);
     } catch (err) {
-      // Generation failed after credits were reserved — release the full
-      // reservation so the organization is never charged for a failed run.
       await releaseFullReservation(job.attrs.data);
       throw err;
     }
   });
 }
 
-module.exports = { defineGenerationJob };
+module.exports = { runGenerationJobNow, defineGenerationJob, releaseFullReservation, RETRYABLE_STEPS };

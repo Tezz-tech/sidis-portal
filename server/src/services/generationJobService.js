@@ -1,4 +1,6 @@
 const { enqueueGeneration, getGenerationJobStatus } = require('../jobs/queue');
+const { runGenerationJobNow } = require('../jobs/generationWorker');
+const { runInBackground } = require('../utils/runInBackground');
 const { scoped } = require('./scopedRepo');
 const { Document } = require('../models');
 const examService = require('./examService');
@@ -36,7 +38,7 @@ async function requestGeneration(tenant, examId, { count, typeMix, difficulty })
 
   const requester = await authService.getCurrentUser(tenant.userId);
 
-  const jobId = await enqueueGeneration({
+  const job = await enqueueGeneration({
     examId,
     documentId: exam.sourceDocument.toString(),
     count,
@@ -48,7 +50,12 @@ async function requestGeneration(tenant, examId, { count, typeMix, difficulty })
     requesterFirstName: requester.firstName,
   });
 
-  return { jobId, estimatedCost: cost };
+  // There is no separate always-on worker process to pick this up — start
+  // processing immediately, continuing after this request has responded
+  // (via waitUntil on Vercel; awaited normally everywhere else).
+  runInBackground(() => runGenerationJobNow(job), 'generation-start');
+
+  return { jobId: job.attrs._id.toString(), estimatedCost: cost };
 }
 
 async function getJobStatus(jobId) {

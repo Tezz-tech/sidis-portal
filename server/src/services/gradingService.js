@@ -4,6 +4,7 @@ const { callClaude, extractJsonText } = require('./aiClient');
 const env = require('../config/env');
 const creditService = require('./creditService');
 const { enqueueGrading } = require('../jobs/queue');
+const { runInBackground } = require('../utils/runInBackground');
 const logger = require('../config/logger');
 
 const LOW_CONFIDENCE_THRESHOLD = 0.7;
@@ -27,12 +28,6 @@ async function submitAttempt(session) {
     throw new Error('No active attempt to submit');
   }
   return finalizeSubmission(attempt._id);
-}
-
-async function autoSubmitIfStillInProgress(attemptId) {
-  const attempt = await Attempt.findById(attemptId);
-  if (!attempt || attempt.status !== 'in_progress') return null;
-  return finalizeSubmission(attemptId);
 }
 
 async function finalizeSubmission(attemptId) {
@@ -76,6 +71,9 @@ async function finalizeSubmission(attemptId) {
 
   if (hasShortAnswer) {
     await enqueueGrading(attempt._id.toString());
+    // No separate always-on worker picks this up — start grading right now,
+    // continuing after this request has responded (waitUntil on Vercel).
+    runInBackground(() => processGradingJob(attempt._id.toString()), 'grading-start');
   } else {
     await computeFinalScore(attempt._id);
   }
@@ -197,7 +195,6 @@ async function processGradingJob(attemptId) {
 module.exports = {
   submitAttempt,
   finalizeSubmission,
-  autoSubmitIfStillInProgress,
   computeFinalScore,
   gradeShortAnswers,
   processGradingJob,

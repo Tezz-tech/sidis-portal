@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@vercel/functions": "^3.9.5",
     "agenda": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.4.0",

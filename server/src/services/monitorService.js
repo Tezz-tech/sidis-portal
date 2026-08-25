@@ -1,9 +1,11 @@
 const { scoped } = require('./scopedRepo');
 const { Invitation, Attempt } = require('../models');
 const examService = require('./examService');
+const { sweepOverdueAttempts } = require('./deadlineSweepService');
 
 async function getLiveMonitor(tenant, examId) {
   await examService.getExam(tenant, examId);
+  await sweepOverdueAttempts(examId);
 
   const [invitations, attempts] = await Promise.all([
     scoped(Invitation, tenant).find({ exam: examId }).populate('participant', 'firstName lastName email externalId'),

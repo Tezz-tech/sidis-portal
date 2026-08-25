@@ -1,7 +1,8 @@
 const { Attempt, Invitation, Exam, Question } = require('../models');
 const { shuffle } = require('../utils/shuffle');
 const AppError = require('../utils/AppError');
-const { scheduleAutoSubmit } = require('../jobs/queue');
+const { finalizeSubmission, processGradingJob } = require('./gradingService');
+const { runInBackground } = require('../utils/runInBackground');
 
 async function loadContext(session) {
   const [invitation, exam] = await Promise.all([
@@ -69,14 +70,33 @@ async function getOrCreateAttempt(session) {
   invitation.status = 'started';
   await invitation.save();
 
-  await scheduleAutoSubmit(attempt._id.toString(), serverDeadlineAt);
-
   return attempt;
 }
 
+/**
+ * Finalizes an attempt if its deadline has passed. There's no persistent
+ * worker to enforce this at the exact deadline moment, so it's checked
+ * opportunistically instead — every participant-facing read/write on an
+ * in-progress attempt, plus the staff live monitor and results views (see
+ * monitorService/resultService), calls this first. Between those call
+ * sites, an overdue attempt is caught within moments in virtually every
+ * real case: the participant's own next action, or a creator glancing at
+ * the monitor, which already polls every few seconds while open.
+ */
+async function finalizeIfOverdue(attempt) {
+  if (attempt.status !== 'in_progress') return attempt;
+  if (new Date() <= new Date(attempt.serverDeadlineAt)) return attempt;
+  return finalizeSubmission(attempt._id);
+}
+
 async function getRunnerState(session) {
-  const attempt = await Attempt.findOne({ invitation: session.invitationId, status: 'in_progress' });
+  let attempt = await Attempt.findOne({ invitation: session.invitationId, status: 'in_progress' });
   if (!attempt) throw new AppError('No exam is currently in progress for this invitation', 404, 'NO_ACTIVE_ATTEMPT');
+
+  attempt = await finalizeIfOverdue(attempt);
+  if (attempt.status !== 'in_progress') {
+    throw new AppError('Time is up for this exam. It has been submitted automatically.', 400, 'DEADLINE_PASSED');
+  }
 
   const { exam } = await loadContext(session);
   const questions = await Question.find({ _id: { $in: attempt.questionOrder } });
@@ -118,10 +138,12 @@ async function getRunnerState(session) {
 }
 
 async function saveAnswer(session, questionId, { selectedOptionKey, textAnswer, flaggedForReview }) {
-  const attempt = await Attempt.findOne({ invitation: session.invitationId, status: 'in_progress' });
+  let attempt = await Attempt.findOne({ invitation: session.invitationId, status: 'in_progress' });
   if (!attempt) throw new AppError('No exam is currently in progress for this invitation', 404, 'NO_ACTIVE_ATTEMPT');
-  if (new Date() > new Date(attempt.serverDeadlineAt)) {
-    throw new AppError('Time is up for this exam', 400, 'DEADLINE_PASSED');
+
+  attempt = await finalizeIfOverdue(attempt);
+  if (attempt.status !== 'in_progress') {
+    throw new AppError('Time is up for this exam. It has been submitted automatically.', 400, 'DEADLINE_PASSED');
   }
 
   const idx = attempt.answers.findIndex((a) => a.question.toString() === questionId);
@@ -159,10 +181,21 @@ async function getStatus(session) {
   return { status: attempt.status, attemptId: attempt._id };
 }
 
+// If grading has been sitting in 'submitted' this long without reaching
+// 'graded', treat it as stuck (e.g. the invocation that started it got cut
+// off) and kick off a fresh attempt inline. Re-running processGradingJob is
+// safe even if the original run eventually does finish — it early-returns
+// once status is no longer 'submitted'.
+const GRADING_STUCK_THRESHOLD_MS = 20 * 1000;
+
 async function getParticipantResult(session) {
   const attempt = await Attempt.findOne({ invitation: session.invitationId }).sort({ createdAt: -1 });
   if (!attempt) throw new AppError('No attempt found', 404, 'NOT_FOUND');
   const { exam } = await loadContext(session);
+
+  if (attempt.status === 'submitted' && Date.now() - new Date(attempt.submittedAt).getTime() > GRADING_STUCK_THRESHOLD_MS) {
+    runInBackground(() => processGradingJob(attempt._id.toString()), 'grading-retry');
+  }
 
   if (attempt.status !== 'graded') {
     return { status: attempt.status, ready: false };
@@ -215,4 +248,5 @@ module.exports = {
   loadContext,
   getStatus,
   getParticipantResult,
+  finalizeIfOverdue,
 };
