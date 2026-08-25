@@ -24,7 +24,7 @@ async function requestCode(req, res, next) {
 async function verifyCode(req, res, next) {
   try {
     const sessionToken = await participantAuthService.verifyCode(req.params.token, req.body.code);
-    setParticipantSessionCookie(res, sessionToken);
+    setParticipantSessionCookie(req, res, sessionToken);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -97,7 +97,7 @@ async function getResult(req, res, next) {
 
 async function logout(req, res, next) {
   try {
-    clearParticipantSessionCookie(res);
+    clearParticipantSessionCookie(req, res);
     res.status(204).end();
   } catch (err) {
     next(err);

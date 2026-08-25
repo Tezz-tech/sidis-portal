@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 async function login(req, res, next) {
   try {
     const { accessToken, refreshToken, user } = await authService.login(req.body);
-    setStaffAuthCookies(res, { accessToken, refreshToken });
+    setStaffAuthCookies(req, res, { accessToken, refreshToken });
     res.json({ user });
   } catch (err) {
     next(err);
@@ -17,7 +17,7 @@ async function refresh(req, res, next) {
     const token = req.cookies?.refreshToken;
     if (!token) throw new AppError('Your session has expired. Sign in again.', 401, 'TOKEN_EXPIRED');
     const { accessToken, refreshToken, user } = await authService.refresh(token);
-    setStaffAuthCookies(res, { accessToken, refreshToken });
+    setStaffAuthCookies(req, res, { accessToken, refreshToken });
     res.json({ user });
   } catch (err) {
     next(err);
@@ -29,7 +29,7 @@ async function logout(req, res, next) {
     if (req.tenant?.userId) {
       await authService.logout(req.tenant.userId);
     }
-    clearStaffAuthCookies(res);
+    clearStaffAuthCookies(req, res);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -39,7 +39,7 @@ async function logout(req, res, next) {
 async function acceptInvite(req, res, next) {
   try {
     const { accessToken, refreshToken, user } = await authService.acceptInvite(req.body);
-    setStaffAuthCookies(res, { accessToken, refreshToken });
+    setStaffAuthCookies(req, res, { accessToken, refreshToken });
     res.json({ user });
   } catch (err) {
     next(err);
