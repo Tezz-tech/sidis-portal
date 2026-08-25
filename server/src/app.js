@@ -6,6 +6,7 @@ const pinoHttp = require('pino-http');
 
 const env = require('./config/env');
 const logger = require('./config/logger');
+const connectDB = require('./config/db');
 const { apiLimiter } = require('./middleware/rateLimit');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const webhookRoutes = require('./routes/webhookRoutes');
@@ -32,6 +33,18 @@ app.use(
   }),
 );
 app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/health' } }));
+
+// On a normal long-running process (Render), connectDB() already resolved
+// before app.listen() in server.js, so this is a fast no-op check on every
+// request. On a serverless platform (Vercel) that may invoke this module
+// without ever running that boot sequence, this is what actually establishes
+// — and caches across warm invocations — the connection before any route
+// touches the database. Without it, Mongoose silently buffers queries and
+// they time out after 10s with no useful error.
+app.use((req, res, next) => {
+  if (req.path === '/health') return next();
+  connectDB().then(() => next()).catch(next);
+});
 
 // Paystack webhook needs the raw body for signature verification, so it is
 // mounted before the JSON body parser applies to everything else.
