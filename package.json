@@ -1,0 +1,15 @@
+{
+  "name": "sidis-portal",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace server",
+    "dev:worker": "npm run worker --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "lint:tenancy": "node server/scripts/checkTenancy.js"
+  }
+}

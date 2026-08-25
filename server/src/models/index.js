@@ -1,0 +1,16 @@
+module.exports = {
+  Organization: require('./Organization'),
+  User: require('./User'),
+  Participant: require('./Participant'),
+  Document: require('./Document'),
+  Exam: require('./Exam'),
+  Question: require('./Question'),
+  Invitation: require('./Invitation'),
+  Attempt: require('./Attempt'),
+  CreditTransaction: require('./CreditTransaction'),
+  Payment: require('./Payment'),
+  PricingConfig: require('./PricingConfig'),
+  AuditLog: require('./AuditLog'),
+  OtpCode: require('./OtpCode'),
+  ParticipantSession: require('./ParticipantSession'),
+};

@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-sheet text-ink font-sans text-body antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-head;
+  }
+
+  ::selection {
+    background: theme('colors.marker.wash');
+    color: theme('colors.ink');
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.marker.DEFAULT');
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-color: theme('colors.pencil') transparent;
+  }
+}
+
+@layer components {
+  /* The Sidis wordmark and page titles: Archivo pushed to its Expanded axis
+     instance. This one move is the single most distinctive thing in the type
+     system, so it lives here rather than being re-declared per screen. */
+  .font-display {
+    font-family: theme('fontFamily.display');
+    font-stretch: 125%;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-rule/60 rounded-card;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: shimmer 1.4s linear infinite;
+  }
+
+  .bubble {
+    @apply inline-flex items-center justify-center rounded-full border-2 border-rule bg-paper transition-transform;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .bubble[data-filled='true'] {
+    @apply bg-ink border-ink;
+    animation: bubble-fill 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .bubble[data-flagged='true'] {
+    @apply border-marker;
+  }
+  .bubble[data-current='true'] {
+    @apply outline outline-2 outline-ink outline-offset-2;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes bubble-fill {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.timer-pulse {
+  animation: timer-pulse 400ms ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}

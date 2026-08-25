@@ -1,0 +1,92 @@
+const { Payment, Organization } = require('../models');
+const { scoped } = require('./scopedRepo');
+const paystackService = require('./paystackService');
+const creditService = require('./creditService');
+const pricingService = require('./pricingService');
+const emailService = require('./emailService');
+const AppError = require('../utils/AppError');
+const { randomToken } = require('../utils/tokens');
+const logger = require('../config/logger');
+
+async function initializePurchase(tenant, { packId }, staffEmail) {
+  const pricing = await pricingService.getPricingConfig();
+  const pack = pricing.packs.id(packId);
+  if (!pack || !pack.isActive) {
+    throw new AppError('That credit pack is not available', 400, 'INVALID_PACK');
+  }
+
+  const reference = `sidis_${randomToken(12)}`;
+  await scoped(Payment, tenant).create({
+    paystackReference: reference,
+    amountKobo: pack.priceKobo,
+    currency: 'NGN',
+    creditsPurchased: pack.credits,
+    status: 'pending',
+  });
+
+  const tx = await paystackService.initializeTransaction({
+    email: staffEmail,
+    amountKobo: pack.priceKobo,
+    reference,
+    metadata: { organizationId: tenant.organizationId, packId, credits: pack.credits },
+  });
+
+  return { authorizationUrl: tx.authorization_url, reference };
+}
+
+/**
+ * The webhook is the source of truth for crediting an account — never the
+ * client-side callback. Verifies against the Paystack API (not just the
+ * signed payload) before crediting, and is idempotent on paystackReference so
+ * a replayed webhook can never credit twice.
+ */
+async function handleChargeSuccess(reference) {
+  const payment = await Payment.findOne({ paystackReference: reference });
+  if (!payment) {
+    logger.warn({ reference }, 'Webhook for unknown payment reference');
+    return;
+  }
+  if (payment.status === 'success') {
+    return; // already processed — idempotent no-op
+  }
+
+  const verified = await paystackService.verifyTransaction(reference);
+  if (verified.status !== 'success') {
+    payment.status = 'failed';
+    payment.rawWebhookPayload = verified;
+    await payment.save();
+    return;
+  }
+
+  payment.status = 'success';
+  payment.paidAt = new Date(verified.paid_at || Date.now());
+  payment.rawWebhookPayload = verified;
+  await payment.save();
+
+  await creditService.purchase({
+    organizationId: payment.organization,
+    amount: payment.creditsPurchased,
+    reference: { model: 'Payment', id: payment._id },
+    description: `Purchased ${payment.creditsPurchased} credits`,
+  });
+
+  const org = await Organization.findById(payment.organization);
+  const { User } = require('../models');
+  const admins = await User.find({ organization: payment.organization, role: 'org_admin', status: 'active' });
+  await Promise.all(
+    admins.map((admin) => emailService.sendReceiptEmail({
+      to: admin.email,
+      organizationName: org.name,
+      credits: payment.creditsPurchased,
+      amountKobo: payment.amountKobo,
+      reference,
+    })),
+  );
+}
+
+async function getBalance(tenant) {
+  const org = await Organization.findById(tenant.organizationId).select('creditBalance');
+  return org.creditBalance;
+}
+
+module.exports = { initializePurchase, handleChargeSuccess, getBalance };
