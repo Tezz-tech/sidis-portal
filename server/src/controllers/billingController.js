@@ -52,4 +52,13 @@ async function initializePurchase(req, res, next) {
   }
 }
 
-module.exports = { getPacks, getRates, getBalance, getLedger, initializePurchase };
+async function confirmPurchase(req, res, next) {
+  try {
+    const result = await billingService.confirmPurchase(req.tenant, req.body.reference);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getPacks, getRates, getBalance, getLedger, initializePurchase, confirmPurchase };

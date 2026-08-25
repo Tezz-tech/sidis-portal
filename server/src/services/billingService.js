@@ -84,9 +84,38 @@ async function handleChargeSuccess(reference) {
   );
 }
 
+/**
+ * Called when the browser lands back on the billing callback page after
+ * checkout. The webhook is still the primary path — this exists because a
+ * webhook can be delayed, misconfigured, or simply never arrive (Paystack's
+ * webhook URL has to be set up separately in their dashboard), and a
+ * customer's payment succeeding shouldn't depend on that being right. Safe
+ * to call unconditionally: it re-verifies against the Paystack API itself
+ * before crediting anything, and handleChargeSuccess is idempotent, so if
+ * the webhook *does* also fire — before or after this — nothing double-credits.
+ */
+async function confirmPurchase(tenant, reference) {
+  const payment = await scoped(Payment, tenant).findOne({ paystackReference: reference });
+  if (!payment) {
+    throw new AppError('We could not find that payment', 404, 'NOT_FOUND');
+  }
+  if (payment.status === 'pending') {
+    await handleChargeSuccess(reference);
+  }
+  const [refreshed, org] = await Promise.all([
+    scoped(Payment, tenant).findById(payment._id),
+    Organization.findById(tenant.organizationId).select('creditBalance'),
+  ]);
+  return {
+    status: refreshed.status,
+    creditsPurchased: refreshed.creditsPurchased,
+    creditBalance: org.creditBalance,
+  };
+}
+
 async function getBalance(tenant) {
   const org = await Organization.findById(tenant.organizationId).select('creditBalance');
   return org.creditBalance;
 }
 
-module.exports = { initializePurchase, handleChargeSuccess, getBalance };
+module.exports = { initializePurchase, handleChargeSuccess, confirmPurchase, getBalance };

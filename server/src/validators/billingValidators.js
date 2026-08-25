@@ -18,4 +18,8 @@ const initializePurchaseSchema = z.object({
   packId: z.string().min(1),
 });
 
-module.exports = { pricingConfigSchema, initializePurchaseSchema };
+const confirmPurchaseSchema = z.object({
+  reference: z.string().min(1),
+});
+
+module.exports = { pricingConfigSchema, initializePurchaseSchema, confirmPurchaseSchema };

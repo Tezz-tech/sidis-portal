@@ -23,6 +23,7 @@ import LiveMonitor from './routes/app/LiveMonitor';
 import Results from './routes/app/Results';
 import ResultDetail from './routes/app/ResultDetail';
 import Billing from './routes/app/Billing';
+import BillingCallback from './routes/app/BillingCallback';
 import Team from './routes/app/Team';
 import OrgSettings from './routes/app/OrgSettings';
 
@@ -73,6 +74,7 @@ export default function App() {
         <Route path="exams/:examId/results/:attemptId" element={<ResultDetail />} />
         <Route path="participants" element={<Participants />} />
         <Route path="billing" element={<Billing />} />
+        <Route path="billing/callback" element={<BillingCallback />} />
         <Route path="team" element={<Team />} />
         <Route path="settings" element={<OrgSettings />} />
       </Route>
