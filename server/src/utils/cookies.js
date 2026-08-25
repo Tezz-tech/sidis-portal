@@ -1,10 +1,22 @@
 const env = require('../config/env');
 
+// Frontend and API commonly end up on different registrable domains (e.g.
+// separate *.vercel.app subdomains, which are different "sites" under the
+// public suffix list, not just different origins) — that needs SameSite=None
+// (which itself requires Secure) or the browser drops the cookie on every
+// cross-site request. Only set Domain when it's a real shared parent domain;
+// a mismatched Domain (e.g. 'localhost' sent over a production HTTPS
+// response) makes the browser reject the Set-Cookie header outright.
+const isProduction = env.NODE_ENV === 'production';
+const validCookieDomain = isProduction && env.COOKIE_DOMAIN && env.COOKIE_DOMAIN !== 'localhost'
+  ? env.COOKIE_DOMAIN
+  : undefined;
+
 const baseOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  domain: env.NODE_ENV === 'production' ? env.COOKIE_DOMAIN : undefined,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  ...(validCookieDomain ? { domain: validCookieDomain } : {}),
 };
 
 function setStaffAuthCookies(res, { accessToken, refreshToken }) {

@@ -13,11 +13,21 @@ const routes = require('./routes');
 
 const app = express();
 
+const allowedOrigins = new Set([
+  'http://localhost:5173',
+  ...env.FRONTEND_URL.split(',').map((o) => o.trim()).filter(Boolean),
+]);
+
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      // No Origin header means a same-origin request or a non-browser client
+      // (curl, the Paystack webhook, server-to-server) — never CORS-checked.
+      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+      return callback(new Error(`Origin ${origin} is not allowed`));
+    },
     credentials: true,
   }),
 );
