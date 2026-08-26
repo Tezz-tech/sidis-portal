@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Check, Sparkles } from 'lucide-react';
+import { FileText, Check } from 'lucide-react';
 
 const STEPS = [
   { kind: 'file', label: 'staff-handbook.pdf', meta: '38 pages · 41,208 characters' },
@@ -44,7 +44,7 @@ export default function DemoSequence() {
   return (
     <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-6 min-h-[420px]">
       <div className="flex items-center gap-2 mb-5 text-xs font-bold tracking-widest text-orange-400 uppercase">
-        <Sparkles size={14} strokeWidth={2.5} />
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
         Live generation
       </div>
       <div className="space-y-3">

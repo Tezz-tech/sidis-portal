@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { apiErrorMessage } from '../../lib/api';
 import MarketingButton from './marketing/MarketingButton';
@@ -91,9 +91,6 @@ export default function Login() {
           transition={{ duration: 0.6 }}
           className="relative text-center px-12 max-w-md"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-orange-500/40">
-            <Sparkles className="w-8 h-8" strokeWidth={1.75} />
-          </div>
           <h2 className="text-4xl font-black text-white mb-4 tracking-tight">Welcome back!</h2>
           <p className="text-gray-300 text-lg leading-relaxed">
             Pick up right where you left off — generate a new exam or check in on results coming in live.

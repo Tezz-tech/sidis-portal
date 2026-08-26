@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload, ShieldCheck, Wallet, Brain, FileText, Sparkles, CheckCircle2, ArrowRight, ListChecks } from 'lucide-react';
+import { Upload, ShieldCheck, Wallet, Brain, FileText, PenSquare, CheckCircle2, ArrowRight, Check } from 'lucide-react';
 import DemoSequence from './DemoSequence';
 import MarketingButton from './marketing/MarketingButton';
 import GlassCard from './marketing/GlassCard';
@@ -14,7 +14,7 @@ const FEATURES = [
 
 const STEPS = [
   { icon: FileText, label: 'Upload', body: 'Drop in a document — lecture notes, a policy manual, training material.' },
-  { icon: Sparkles, label: 'Generate', body: 'Choose a question count and mix. The AI writes and cites every question.' },
+  { icon: PenSquare, label: 'Generate', body: 'Choose a question count and mix. The AI writes and cites every question.' },
   { icon: CheckCircle2, label: 'Publish', body: 'Review, invite participants, and watch results come in live.' },
 ];
 
@@ -28,14 +28,9 @@ export default function Landing() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-950 via-black to-gray-950 pt-20 pb-24 overflow-hidden">
+      <section className="bg-gradient-to-br from-gray-950 via-black to-gray-950 pt-10 pb-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/20 border border-orange-500/40 mb-8">
-              <Sparkles size={14} strokeWidth={2.5} className="text-orange-400" />
-              <span className="text-xs font-bold text-orange-300 tracking-wide">AI-POWERED ASSESSMENT PLATFORM</span>
-            </div>
-
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
               Turn a document into a{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">
@@ -88,9 +83,7 @@ export default function Landing() {
                 <ul className="space-y-4">
                   {CHECKLIST.map((line) => (
                     <li key={line} className="flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center shrink-0 mt-0.5">
-                        <ListChecks size={12} strokeWidth={2.5} className="text-white" />
-                      </span>
+                      <Check size={18} strokeWidth={2.5} className="text-orange-400 shrink-0 mt-0.5" />
                       <span className="text-gray-300">{line}</span>
                     </li>
                   ))}

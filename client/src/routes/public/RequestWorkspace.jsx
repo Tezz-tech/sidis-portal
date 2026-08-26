@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { CheckCircle2, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, FileText, Zap, ShieldCheck } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
 import MarketingButton from './marketing/MarketingButton';
 
@@ -19,7 +19,7 @@ const schema = z.object({
 
 const PERKS = [
   { icon: Zap, text: 'Your workspace is live the moment you submit — no waiting on manual approval.' },
-  { icon: Sparkles, text: 'Generate your first exam from a document in minutes.' },
+  { icon: FileText, text: 'Generate your first exam from a document in minutes.' },
   { icon: ShieldCheck, text: 'No card required. Credits only cover what you actually generate and grade.' },
 ];
 
