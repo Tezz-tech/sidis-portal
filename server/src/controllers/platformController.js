@@ -2,6 +2,8 @@ const organizationService = require('../services/organizationService');
 const creditService = require('../services/creditService');
 const pricingService = require('../services/pricingService');
 const platformMetricsService = require('../services/platformMetricsService');
+const authService = require('../services/authService');
+const auditService = require('../services/auditService');
 
 async function listOrganizations(req, res, next) {
   try {
@@ -48,6 +50,83 @@ async function grantCredits(req, res, next) {
       createdBy: req.tenant.userId,
     });
     res.json({ creditBalance: balance });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function adjustCredits(req, res, next) {
+  try {
+    const balance = await creditService.adjust({
+      organizationId: req.params.id,
+      amount: req.body.amount,
+      description: req.body.description,
+      createdBy: req.tenant.userId,
+    });
+    res.json({ creditBalance: balance });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateOrganization(req, res, next) {
+  try {
+    const org = await organizationService.updateOrganization(req.params.id, req.body, req.tenant.userId);
+    res.json({ organization: org });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function listOrgTeam(req, res, next) {
+  try {
+    const users = await organizationService.listOrgTeam(req.params.id);
+    res.json({ team: users.map(authService.toSafeUser) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateOrgTeamMemberRole(req, res, next) {
+  try {
+    const user = await organizationService.updateOrgTeamMemberRole(req.params.id, req.params.userId, req.body.role, req.tenant.userId);
+    res.json({ user: authService.toSafeUser(user) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateOrgTeamMemberStatus(req, res, next) {
+  try {
+    const user = await organizationService.updateOrgTeamMemberStatus(req.params.id, req.params.userId, req.body.status, req.tenant.userId);
+    res.json({ user: authService.toSafeUser(user) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function listOrgExams(req, res, next) {
+  try {
+    const exams = await organizationService.listOrgExams(req.params.id);
+    res.json({ exams });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function forceCloseExam(req, res, next) {
+  try {
+    const exam = await organizationService.forceCloseExam(req.params.id, req.params.examId, req.tenant.userId);
+    res.json({ exam });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getAuditLog(req, res, next) {
+  try {
+    const entries = await auditService.listAuditLog({ organization: req.query.organization || undefined, limit: Number(req.query.limit) || undefined });
+    res.json({ entries });
   } catch (err) {
     next(err);
   }
@@ -103,10 +182,18 @@ module.exports = {
   getOrganization,
   createOrganization,
   setOrganizationStatus,
+  updateOrganization,
   grantCredits,
+  adjustCredits,
   getOrganizationLedger,
+  listOrgTeam,
+  updateOrgTeamMemberRole,
+  updateOrgTeamMemberStatus,
+  listOrgExams,
+  forceCloseExam,
   getPricingConfig,
   updatePricingConfig,
   listPayments,
   getMetrics,
+  getAuditLog,
 };

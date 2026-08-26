@@ -1,12 +1,13 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Tag, Receipt, LogOut } from 'lucide-react';
+import { Building2, Tag, Receipt, ScrollText, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Organizations', icon: Building2, end: true },
   { to: '/admin/pricing', label: 'Pricing', icon: Tag },
   { to: '/admin/payments', label: 'Payments', icon: Receipt },
+  { to: '/admin/audit-log', label: 'Audit log', icon: ScrollText },
 ];
 
 export default function PlatformLayout() {

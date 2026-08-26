@@ -32,6 +32,7 @@ import Organizations from './routes/platform/Organizations';
 import OrganizationDetail from './routes/platform/OrganizationDetail';
 import PlatformPricing from './routes/platform/PlatformPricing';
 import Payments from './routes/platform/Payments';
+import AuditLog from './routes/platform/AuditLog';
 
 import ExamLayout from './routes/exam/ExamLayout';
 import InviteLanding from './routes/exam/InviteLanding';
@@ -91,6 +92,7 @@ export default function App() {
         <Route path="organizations/:id" element={<OrganizationDetail />} />
         <Route path="pricing" element={<PlatformPricing />} />
         <Route path="payments" element={<Payments />} />
+        <Route path="audit-log" element={<AuditLog />} />
       </Route>
 
       <Route path="/exam" element={<ExamLayout />}>

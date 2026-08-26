@@ -93,6 +93,14 @@ function grant({ organizationId, amount, description, createdBy }) {
   return applyTransaction({ organizationId, type: 'grant', amount, description, createdBy });
 }
 
+// Unlike grant (always positive — a bonus), this takes a signed amount so
+// the platform owner can correct a balance in either direction, distinctly
+// logged as 'adjustment' rather than being confused with a normal grant or
+// the generation/grading flow's own reserve/release/commit lifecycle.
+function adjust({ organizationId, amount, description, createdBy }) {
+  return applyTransaction({ organizationId, type: 'adjustment', amount, description, createdBy });
+}
+
 function purchase({ organizationId, amount, reference, description }) {
   return applyTransaction({ organizationId, type: 'purchase', amount, reference, description });
 }
@@ -119,6 +127,7 @@ module.exports = {
   commitGeneration,
   chargeGrading,
   grant,
+  adjust,
   purchase,
   refund,
   getLedger,

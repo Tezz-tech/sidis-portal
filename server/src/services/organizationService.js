@@ -3,6 +3,7 @@ const AppError = require('../utils/AppError');
 const { randomToken } = require('../utils/tokens');
 const { sendInviteEmail } = require('./emailService');
 const { writeAuditLog } = require('./auditService');
+const examService = require('./examService');
 
 const INVITE_TTL_MS = 72 * 60 * 60 * 1000;
 
@@ -84,4 +85,97 @@ async function setStatus(organizationId, status, actorId) {
   return org.toObject();
 }
 
-module.exports = { listOrganizations, getOrganization, createOrganization, setStatus };
+// name/type/logoUrl only — not slug, since that's woven into whatever URLs
+// an org has already shared, and not status, which goes through setStatus
+// so it stays a distinct, clearly-audited action.
+async function updateOrganization(organizationId, { name, type, logoUrl }, actorId) {
+  const updates = {};
+  if (name !== undefined) updates.name = name;
+  if (type !== undefined) updates.type = type;
+  if (logoUrl !== undefined) updates.logoUrl = logoUrl;
+
+  const org = await Organization.findByIdAndUpdate(organizationId, updates, { new: true });
+  if (!org) throw new AppError('Organization not found', 404, 'NOT_FOUND');
+  await writeAuditLog({
+    organization: organizationId,
+    actor: actorId,
+    action: 'organization.updated',
+    targetModel: 'Organization',
+    targetId: organizationId,
+    metadata: updates,
+  });
+  return org.toObject();
+}
+
+/**
+ * Everything below is the platform-owner equivalent of what an org_admin
+ * can already do for their own org (teamService.js, examService.js) — same
+ * operations, just reachable across every tenant instead of the caller's
+ * own. Team-member role/status changes and exam listing/closing all reuse
+ * the org-scoped functions directly with a constructed tenant context,
+ * rather than duplicating that logic here.
+ */
+async function listOrgTeam(organizationId) {
+  return User.find({ organization: organizationId }).sort({ createdAt: 1 });
+}
+
+async function updateOrgTeamMemberRole(organizationId, userId, role, actorId) {
+  const user = await User.findOneAndUpdate({ _id: userId, organization: organizationId }, { role }, { new: true });
+  if (!user) throw new AppError('Team member not found', 404, 'NOT_FOUND');
+  await writeAuditLog({
+    organization: organizationId,
+    actor: actorId,
+    action: 'team.role_changed',
+    targetModel: 'User',
+    targetId: userId,
+    metadata: { role, changedByPlatformOwner: true },
+  });
+  return user;
+}
+
+async function updateOrgTeamMemberStatus(organizationId, userId, status, actorId) {
+  const user = await User.findOneAndUpdate({ _id: userId, organization: organizationId }, { status }, { new: true });
+  if (!user) throw new AppError('Team member not found', 404, 'NOT_FOUND');
+  await writeAuditLog({
+    organization: organizationId,
+    actor: actorId,
+    action: status === 'disabled' ? 'team.disabled' : 'team.enabled',
+    targetModel: 'User',
+    targetId: userId,
+    metadata: { changedByPlatformOwner: true },
+  });
+  return user;
+}
+
+async function listOrgExams(organizationId) {
+  return Exam.find({ organization: organizationId }).sort({ createdAt: -1 });
+}
+
+function platformOwnerTenant(organizationId, actorId) {
+  return { organizationId, userId: actorId, role: 'platform_owner' };
+}
+
+async function forceCloseExam(organizationId, examId, actorId) {
+  const exam = await examService.closeExam(platformOwnerTenant(organizationId, actorId), examId, actorId);
+  await writeAuditLog({
+    organization: organizationId,
+    actor: actorId,
+    action: 'exam.force_closed_by_platform_owner',
+    targetModel: 'Exam',
+    targetId: examId,
+  });
+  return exam;
+}
+
+module.exports = {
+  listOrganizations,
+  getOrganization,
+  createOrganization,
+  setStatus,
+  updateOrganization,
+  listOrgTeam,
+  updateOrgTeamMemberRole,
+  updateOrgTeamMemberStatus,
+  listOrgExams,
+  forceCloseExam,
+};

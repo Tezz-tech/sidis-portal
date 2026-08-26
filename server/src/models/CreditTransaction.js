@@ -5,7 +5,7 @@ const creditTransactionSchema = new Schema(
     organization: { type: Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
     type: {
       type: String,
-      enum: ['purchase', 'generation', 'grading', 'refund', 'grant', 'reservation', 'release'],
+      enum: ['purchase', 'generation', 'grading', 'refund', 'grant', 'adjustment', 'reservation', 'release'],
       required: true,
     },
     amount: { type: Number, required: true },
