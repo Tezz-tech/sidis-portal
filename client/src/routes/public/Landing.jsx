@@ -28,64 +28,48 @@ const CHECKLIST = [
 export default function Landing() {
   return (
     <div>
-      {/* Hero — a single centered column. (Previously a two-column split with
-          the demo card as a competing sibling, which is what caused the
-          headline to visibly drift as that card grew taller — stacking
-          everything in one column removes that class of bug entirely.) */}
+      {/* Hero — two columns: illustration + copy + CTAs on the left, the
+          live-generation demo card on the right. The demo card now has a
+          fixed height (see DemoSequence.jsx) instead of one that grows as
+          its steps reveal, so this row's height never changes after first
+          render — items-center is safe here and stays put for the whole
+          animation instead of drifting. */}
       <section className="bg-gradient-to-br from-gray-950 via-black to-gray-950 pt-16 pb-24 overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-          <motion.img
-            src={studyToolkit}
-            alt=""
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="w-64 sm:w-80 md:w-[26rem] h-auto mb-4"
-          />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
+            <motion.img
+              src={studyToolkit}
+              alt=""
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-52 md:w-64 h-auto mb-6 -ml-2"
+            />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight"
-          >
-            Turn a document into a{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">
-              finished test
-            </span>{' '}
-            in minutes.
-          </motion.h1>
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
+              Turn a document into a{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">
+                finished test
+              </span>{' '}
+              in minutes.
+            </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-300 mb-10 max-w-lg leading-relaxed"
-          >
-            Upload lecture notes, a policy manual, or training material. Choose how many questions
-            you need. Sidis writes the test, you review it, and your people take it in the browser.
-          </motion.p>
+            <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-lg leading-relaxed">
+              Upload lecture notes, a policy manual, or training material. Choose how many questions
+              you need. Sidis writes the test, you review it, and your people take it in the browser.
+            </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-4 mb-16"
-          >
-            <MarketingButton to="/request-workspace">
-              Request a workspace <ArrowRight className="w-6 h-6" />
-            </MarketingButton>
-            <MarketingButton to="/pricing" variant="secondary" className="rounded-xl">
-              See pricing
-            </MarketingButton>
+            <div className="flex flex-wrap items-center gap-4">
+              <MarketingButton to="/request-workspace">
+                Request a workspace <ArrowRight className="w-6 h-6" />
+              </MarketingButton>
+              <MarketingButton to="/pricing" variant="secondary" className="rounded-xl">
+                See pricing
+              </MarketingButton>
+            </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full max-w-xl"
-          >
+          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.15 }}>
             <DemoSequence />
           </motion.div>
         </div>
