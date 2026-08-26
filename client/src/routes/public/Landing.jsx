@@ -43,7 +43,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-52 md:w-64 h-auto mb-6 -ml-2"
+              className="w-72 md:w-96 h-auto mb-6 mx-auto block"
             />
 
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
