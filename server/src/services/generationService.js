@@ -80,7 +80,11 @@ async function callAndParse({ passage, count, typeMix, difficulty, organizationI
     const raw = await callGemini({
       systemInstruction: system,
       prompt: userPrompt,
-      maxOutputTokens: Math.min(8192, 400 * count + 1024),
+      // Several of the rotated models spend a few hundred tokens on
+      // invisible "thinking" before any visible output, on top of whatever
+      // count actually needs — too little headroom here gets silently
+      // truncated mid-JSON (finishReason MAX_TOKENS) instead of erroring.
+      maxOutputTokens: Math.min(32768, 700 * count + 4096),
       organizationId,
       label: 'question_generation',
     });

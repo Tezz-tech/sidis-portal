@@ -92,7 +92,9 @@ Write one replacement question of type "${existing.type}". Return JSON only.`;
   const raw = await callGemini({
     systemInstruction: system,
     prompt: userPrompt,
-    maxOutputTokens: 1024,
+    // See the matching comment in generationService.js — headroom above the
+    // visible-output estimate for the rotated models' invisible "thinking".
+    maxOutputTokens: 4096,
     organizationId: tenant.organizationId,
     label: 'question_regenerate',
   });

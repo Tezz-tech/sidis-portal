@@ -137,7 +137,9 @@ Participant's response: ${item.answer.textAnswer || '(no answer given)'}`)
   const raw = await callGemini({
     systemInstruction: system,
     prompt: userPrompt,
-    maxOutputTokens: Math.min(4096, 300 * shortAnswerItems.length + 512),
+    // See the matching comment in generationService.js — headroom above the
+    // visible-output estimate for the rotated models' invisible "thinking".
+    maxOutputTokens: Math.min(32768, 500 * shortAnswerItems.length + 4096),
     organizationId: attempt.organization.toString(),
     label: 'short_answer_grading',
   });

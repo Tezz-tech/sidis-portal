@@ -6,14 +6,20 @@ const AppError = require('../utils/AppError');
 // Ordered fallback chain, most-capable first. A model is only tried once
 // every model ahead of it has failed or hit its rate limit on the current
 // key. Overridable via AI_MODELS (comma-separated) without a code change.
+// Verified live against the ListModels endpoint — gemini-2.5-flash,
+// gemini-2.5-flash-lite, and plain gemini-3-flash are excluded because
+// Google has deprecated/never shipped them for new API keys (both 404).
+// gemini-flash-lite-latest closes the chain as a Google-maintained alias
+// that always resolves to whatever the current lite flash model is, so a
+// future deprecation like that one doesn't leave the chain empty.
 const DEFAULT_MODEL_CHAIN = [
   'gemini-3.7-flash',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
   'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
-  'gemini-3-flash',
-  'gemini-2.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-flash-lite-latest',
 ];
 
 const MODELS = env.AI_MODELS.length > 0 ? env.AI_MODELS : DEFAULT_MODEL_CHAIN;
