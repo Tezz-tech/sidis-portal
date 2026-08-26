@@ -42,52 +42,46 @@ export default function DemoSequence() {
   const visible = STEPS.slice(0, visibleCount);
 
   return (
-    <div className="relative rounded-3xl border border-white/10 bg-voidsoft/80 backdrop-blur-xl p-6 min-h-[420px] shadow-[0_0_60px_rgba(124,92,252,0.15)]">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet/60 to-transparent" />
-      <div className="flex items-center gap-2 mb-5 text-[12px] font-inter font-medium text-violet">
-        <Sparkles size={13} strokeWidth={2} />
-        LIVE GENERATION
+    <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-6 min-h-[420px]">
+      <div className="flex items-center gap-2 mb-5 text-xs font-bold tracking-widest text-orange-400 uppercase">
+        <Sparkles size={14} strokeWidth={2.5} />
+        Live generation
       </div>
       <div className="space-y-3">
         <AnimatePresence initial={false}>
           {visible.map((step, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.32, ease: [0.2, 0, 0, 1] }}
-            >
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
               {step.kind === 'file' && (
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10">
-                  <FileText size={18} strokeWidth={1.5} className="text-cyan shrink-0" />
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <FileText size={20} strokeWidth={1.75} className="text-orange-400 shrink-0" />
                   <div>
-                    <p className="text-[14px] font-inter text-white font-medium">{step.label}</p>
-                    <p className="text-[12px] font-mono text-white/40">{step.meta}</p>
+                    <p className="text-white font-medium">{step.label}</p>
+                    <p className="text-xs text-gray-500">{step.meta}</p>
                   </div>
                 </div>
               )}
               {step.kind === 'status' && (
-                <div className="flex items-center gap-2 text-[13px] font-inter text-white/60 pl-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
+                <div className="flex items-center gap-2 text-sm text-gray-400 pl-1">
+                  <span className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-600 animate-pulse" />
                   {step.label}
                 </div>
               )}
               {step.kind === 'question' && (
-                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.03]">
-                  <p className="text-[11px] font-mono tracking-widest text-white/40 mb-2">QUESTION {step.number}</p>
-                  <p className="text-[14px] font-inter text-white mb-3 leading-relaxed">{step.prompt}</p>
-                  <div className="space-y-1.5">
+                <div className="p-5 rounded-2xl border border-white/10 bg-white/5">
+                  <p className="text-xs font-bold tracking-widest text-gray-500 mb-2">QUESTION {step.number}</p>
+                  <p className="text-white mb-4 leading-relaxed">{step.prompt}</p>
+                  <div className="space-y-2">
                     {step.options.map((opt, oi) => (
                       <div
                         key={oi}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[13px] font-inter ${
-                          oi === step.correct ? 'border-lime/40 bg-lime/10 text-white' : 'border-white/10 text-white/50'
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm ${
+                          oi === step.correct ? 'border-green-500/40 bg-green-500/10 text-white' : 'border-white/10 text-gray-400'
                         }`}
                       >
                         {oi === step.correct ? (
-                          <Check size={14} strokeWidth={2} className="text-lime shrink-0" />
+                          <Check size={15} strokeWidth={2.5} className="text-green-400 shrink-0" />
                         ) : (
-                          <span className="w-3.5 shrink-0" />
+                          <span className="w-4 shrink-0" />
                         )}
                         {opt}
                       </div>

@@ -1,30 +1,31 @@
-import { forwardRef } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
+const MotionLink = motion(Link);
+
 const VARIANTS = {
-  primary: 'bg-lime text-void hover:shadow-[0_0_40px_rgba(211,255,92,0.45)] hover:-translate-y-0.5',
-  ghost: 'bg-white/5 text-white border border-white/15 hover:bg-white/10 hover:border-white/30',
-  dark: 'bg-void text-white hover:shadow-[0_0_30px_rgba(124,92,252,0.35)] hover:-translate-y-0.5',
+  primary: 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-400 hover:to-pink-500 text-white shadow-2xl shadow-orange-500/40',
+  secondary: 'bg-white/10 border border-white/20 text-gray-300 hover:bg-white/20',
 };
 
 const SIZES = {
-  md: 'h-11 px-6 text-[15px]',
-  lg: 'h-14 px-8 text-[16px]',
+  lg: 'text-xl px-10 py-5 gap-4',
+  md: 'text-base px-6 py-3.5 gap-3',
+  sm: 'text-sm px-4 py-2.5 gap-2',
 };
 
-// A distinct button treatment for the marketing pages only — the shared
-// components/ui/Button.jsx stays untouched since it's used across the whole
-// app (staff dashboard, exam-taking flow), which this redesign pass
-// deliberately doesn't touch yet.
-const MarketingButton = forwardRef(function MarketingButton(
-  { as: Component = 'button', variant = 'primary', size = 'md', className, children, ...props },
-  ref,
-) {
+export default function MarketingButton({ to, type = 'button', variant = 'primary', size = 'lg', className, children, ...props }) {
+  const Component = to ? MotionLink : motion.button;
+  const componentProps = to ? { to } : { type };
+
   return (
     <Component
-      ref={ref}
+      {...componentProps}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       className={clsx(
-        'inline-flex items-center justify-center gap-2 rounded-full font-inter font-semibold whitespace-nowrap transition-all duration-300 ease-out',
+        'inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-300',
         VARIANTS[variant],
         SIZES[size],
         className,
@@ -34,6 +35,4 @@ const MarketingButton = forwardRef(function MarketingButton(
       {children}
     </Component>
   );
-});
-
-export default MarketingButton;
+}
