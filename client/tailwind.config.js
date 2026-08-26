@@ -17,12 +17,26 @@ export default {
         },
         pass: '#0F7B5F',
         fail: '#B42318',
+
+        // Marketing-site palette (Landing/Pricing/RequestWorkspace only) —
+        // additive, deliberately separate from the ink/paper tokens above so
+        // the staff dashboard and exam-taking flow are untouched.
+        void: '#08080D',
+        voidsoft: '#131320',
+        mist: '#F6F4FF',
+        violet: { DEFAULT: '#7C5CFC', deep: '#5B3DF0', soft: '#EDE9FF' },
+        cyan: '#22D3EE',
+        lime: '#D3FF5C',
+        coral: '#FF6B5E',
       },
       fontFamily: {
         display: ['"Archivo Expanded"', 'Archivo', 'sans-serif'],
         head: ['Archivo', 'sans-serif'],
         sans: ['"Public Sans"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
+        // Marketing-site fonts (see palette note above).
+        grotesk: ['"Space Grotesk"', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       fontSize: {
         'page-title': ['30px', { lineHeight: '1.25', letterSpacing: '-0.02em', fontWeight: '600' }],
