@@ -24,6 +24,11 @@ const examSchema = new Schema(
       },
       showCorrectAnswers: { type: Boolean, default: false },
     },
+    // Set when generation claims this exam (status -> 'generating'), used
+    // only to detect a stale claim if the claiming execution died abnormally
+    // (e.g. a serverless timeout) instead of failing cleanly — see the
+    // atomic claim in jobs/generationWorker.js.
+    generationClaimedAt: { type: Date, default: null },
     questionCount: { type: Number, default: 0 },
     totalPoints: { type: Number, default: 0 },
     publishedAt: { type: Date, default: null },

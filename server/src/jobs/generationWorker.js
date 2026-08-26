@@ -15,6 +15,16 @@ const logger = require('../config/logger');
 // rather than re-run; the creator can just click Generate again.
 const RETRYABLE_STEPS = new Set(['queued', 'reading', 'understanding', 'writing']);
 
+// Mirrors queue.js's STUCK_THRESHOLD_MS (can't import it directly — queue.js
+// already depends on this file, so the reverse import would be circular). A
+// claim older than this is treated as abandoned: the execution that held it
+// almost certainly died mid-flight (e.g. a serverless timeout) rather than
+// reaching either the success path or the catch block below, so nothing
+// ever reverted it to 'draft'. Without this, that exam could never be
+// regenerated again — the self-healing retry would just see 'generating'
+// and no-op forever.
+const STALE_CLAIM_MS = 90 * 1000;
+
 function buildTenant(data) {
   return { organizationId: data.organizationId, userId: data.requestedBy, role: 'creator' };
 }
@@ -40,7 +50,7 @@ async function releaseFullReservation(data) {
 // got this far, so there's nothing here for it to undo.
 async function revertClaim(data) {
   const tenant = buildTenant(data);
-  await scoped(Exam, tenant).updateOne({ _id: data.examId, status: 'generating' }, { status: 'draft' })
+  await scoped(Exam, tenant).updateOne({ _id: data.examId, status: 'generating' }, { status: 'draft', generationClaimedAt: null })
     .catch((revertErr) => logger.error({ revertErr }, 'Failed to revert exam status after generation failure'));
 }
 
@@ -57,7 +67,18 @@ async function process(job) {
   // claim means some other execution already owns this exam's generation,
   // so this one exits quietly — it does not touch credits or progress,
   // since exactly one winner is responsible for the reservation's lifecycle.
-  const claim = await scoped(Exam, tenant).updateOne({ _id: examId, status: 'draft' }, { status: 'generating' });
+  // The second $or branch reclaims an abandoned claim (see STALE_CLAIM_MS)
+  // rather than leaving the exam stuck at 'generating' forever.
+  const claim = await scoped(Exam, tenant).updateOne(
+    {
+      _id: examId,
+      $or: [
+        { status: 'draft' },
+        { status: 'generating', generationClaimedAt: { $lte: new Date(Date.now() - STALE_CLAIM_MS) } },
+      ],
+    },
+    { status: 'generating', generationClaimedAt: new Date() },
+  );
   if (claim.matchedCount === 0) {
     logger.warn({ jobId: job.attrs._id?.toString(), examId }, 'Generation already claimed for this exam — skipping duplicate run');
     return;
@@ -108,7 +129,7 @@ async function process(job) {
   const totalPoints = allQuestions.reduce((sum, q) => sum + q.points, 0);
   await scoped(Exam, tenant).updateOne(
     { _id: examId },
-    { status: 'review', questionCount: allQuestions.length, totalPoints },
+    { status: 'review', questionCount: allQuestions.length, totalPoints, generationClaimedAt: null },
   );
 
   const pricing = await pricingService.getPricingConfig();

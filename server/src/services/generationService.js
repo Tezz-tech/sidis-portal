@@ -10,7 +10,16 @@ const generatedQuestionSchema = z
   .object({
     type: z.enum(['mcq', 'true_false', 'short_answer']),
     prompt: z.string().min(1),
-    options: z.array(z.object({ key: z.string(), text: z.string() })).optional().default([]),
+    // Every other optional field here is .nullable() because the system
+    // prompt's own JSON template shows null for the fields a given question
+    // type doesn't use (e.g. "expectedAnswer":null). options was missing
+    // that — a short_answer question naturally gets "options":null back
+    // from the model, and .optional() alone rejects null (it only tolerates
+    // undefined), which failed the ENTIRE batch's validation, not just that
+    // one question. This was the real cause of "generation isn't working":
+    // any mixed-type batch that included a short_answer question failed
+    // deterministically, independent of which model answered.
+    options: z.array(z.object({ key: z.string(), text: z.string() })).nullable().optional().default([]),
     correctOptionKey: z.string().nullable().optional(),
     expectedAnswer: z.string().nullable().optional(),
     gradingGuidance: z.string().nullable().optional(),

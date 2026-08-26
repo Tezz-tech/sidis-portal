@@ -151,4 +151,41 @@ describe('generation duplicate-run guard', () => {
     const questionCount = await Question.countDocuments({ exam: ctx.exam._id });
     expect(questionCount).toBe(0);
   });
+
+  test('a fresh (non-stale) claim is not stolen by a concurrent stuck-job retry', async () => {
+    const ctx = await setupExam();
+    await Exam.updateOne({ _id: ctx.exam._id }, { status: 'generating', generationClaimedAt: new Date() });
+
+    const count = 5;
+    generateQuestions.mockResolvedValue(fakeQuestions(count));
+    const data = baseJobData(ctx, count);
+    await generationWorker.runGenerationJobNow(fakeJob(data));
+
+    // The claim is only a few milliseconds old — nowhere near stale — so
+    // this run must not have been able to reclaim and generate.
+    expect(generateQuestions).not.toHaveBeenCalled();
+    const questionCount = await Question.countDocuments({ exam: ctx.exam._id });
+    expect(questionCount).toBe(0);
+  });
+
+  test('a claim abandoned by a run that died mid-flight can be reclaimed once stale', async () => {
+    const ctx = await setupExam();
+    // Simulate a prior execution that won the claim and then died abnormally
+    // (e.g. a serverless timeout) before ever reaching the catch block that
+    // would have reverted it — the exam is left at 'generating' with an old
+    // timestamp, exactly what a real abandoned claim looks like.
+    const longAgo = new Date(Date.now() - 5 * 60 * 1000);
+    await Exam.updateOne({ _id: ctx.exam._id }, { status: 'generating', generationClaimedAt: longAgo });
+
+    const count = 5;
+    generateQuestions.mockResolvedValue(fakeQuestions(count));
+    const data = baseJobData(ctx, count);
+    await generationWorker.runGenerationJobNow(fakeJob(data));
+
+    expect(generateQuestions).toHaveBeenCalledTimes(1);
+    const questionCount = await Question.countDocuments({ exam: ctx.exam._id });
+    expect(questionCount).toBe(count);
+    const finalExam = await Exam.findById(ctx.exam._id);
+    expect(finalExam.status).toBe('review');
+  });
 });
