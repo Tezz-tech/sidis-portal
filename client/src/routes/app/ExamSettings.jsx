@@ -49,6 +49,21 @@ export default function ExamSettings() {
     onError: (err) => toast.error(apiErrorMessage(err)),
   });
 
+  const handleContinue = async () => {
+    // "Save settings" and "Continue" used to be two independent buttons —
+    // editing a field and clicking Continue (the visually prominent one)
+    // silently discarded the change, since only Save actually persisted it.
+    // Save first (if anything changed) so Continue can never lose an edit.
+    if (JSON.stringify(config) !== JSON.stringify(exam.config)) {
+      try {
+        await saveMutation.mutateAsync(config);
+      } catch (err) {
+        return; // saveMutation's onError already surfaced the toast
+      }
+    }
+    navigate(`/app/exams/${examId}/invitations`);
+  };
+
   if (!config) return null;
 
   const isLocked = exam.status === 'published' || exam.status === 'closed';
@@ -125,7 +140,7 @@ export default function ExamSettings() {
           {saveMutation.isPending ? 'Saving...' : 'Save settings'}
         </Button>
         {exam.status === 'review' && exam.reviewConfirmedAt && (
-          <Button variant="marker" onClick={() => navigate(`/app/exams/${examId}/invitations`)}>
+          <Button variant="marker" onClick={handleContinue} disabled={saveMutation.isPending}>
             Continue to invite participants
           </Button>
         )}

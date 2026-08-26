@@ -25,6 +25,20 @@ export default function InviteLanding() {
     );
   }
 
+  // The same link is reused everywhere — the original invite email, a
+  // resumed session, and the "your result is ready" email all point back
+  // here. Without this, someone who already finished (or is mid-attempt)
+  // saw "you have been invited to take this exam" with a plain "Continue"
+  // button, which reads exactly like starting over.
+  const alreadySubmitted = invite.invitationStatus === 'submitted';
+  const inProgress = invite.invitationStatus === 'started';
+  const introText = alreadySubmitted
+    ? `Hello ${invite.participantFirstName}. You've already completed this exam — verify your identity below to view your result.`
+    : inProgress
+      ? `Hello ${invite.participantFirstName}. You have an exam in progress — verify your identity below to continue where you left off.`
+      : `Hello ${invite.participantFirstName}. You have been invited to take this exam.`;
+  const buttonLabel = alreadySubmitted ? 'View your result' : inProgress ? 'Resume exam' : 'Continue';
+
   return (
     <motion.div {...pageEnter} className="text-center py-8">
       {invite.organizationLogoUrl ? (
@@ -33,16 +47,16 @@ export default function InviteLanding() {
         <p className="text-label text-graphite mb-6">{invite.organizationName}</p>
       )}
       <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
-      <p className="text-body text-graphite mb-8">
-        Hello {invite.participantFirstName}. You have been invited to take this exam.
-      </p>
-      <div className="flex justify-center gap-8 text-small text-graphite mb-10 font-mono">
-        <span>{invite.durationMinutes} minutes</span>
-        <span>{invite.questionCount} questions</span>
-        <span>{invite.passMark}% to pass</span>
-      </div>
+      <p className="text-body text-graphite mb-8">{introText}</p>
+      {!alreadySubmitted && (
+        <div className="flex justify-center gap-8 text-small text-graphite mb-10 font-mono">
+          <span>{invite.durationMinutes} minutes</span>
+          <span>{invite.questionCount} questions</span>
+          <span>{invite.passMark}% to pass</span>
+        </div>
+      )}
       <Button variant="marker" size="lg" onClick={() => navigate(`/exam/${token}/verify`)}>
-        Continue
+        {buttonLabel}
       </Button>
     </motion.div>
   );

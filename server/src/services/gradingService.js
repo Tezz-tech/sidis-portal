@@ -115,11 +115,20 @@ async function notifyAttemptGraded(attempt, exam) {
   // participant to view — skip their email rather than send a "your result
   // is ready" link that leads to a page saying results aren't shared.
   if (exam.config.resultVisibility !== 'never') {
+    const canRevealNow = exam.config.resultVisibility === 'immediate'
+      || (exam.config.resultVisibility === 'after_close' && exam.status === 'closed');
     await emailService.sendResultReadyEmail({
       to: participant.email,
       firstName: participant.firstName,
       examTitle: exam.title,
       invitationToken: invitation.token,
+      result: canRevealNow ? {
+        score: attempt.score,
+        totalPoints: exam.totalPoints,
+        percentage: attempt.percentage,
+        passed: attempt.passed,
+        passMark: exam.config.passMark,
+      } : null,
     });
   }
 

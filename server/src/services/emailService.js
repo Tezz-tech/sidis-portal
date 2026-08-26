@@ -88,14 +88,22 @@ async function sendGenerationCompleteEmail({ to, firstName, examTitle, questionC
   });
 }
 
-async function sendResultReadyEmail({ to, firstName, examTitle, invitationToken }) {
+// `result` is only passed when the exam's visibility setting allows it to be
+// shown right now (immediate, or after_close and already closed) — matching
+// exactly what the participant would see if they clicked through, so the
+// email never states a score the app itself would still be hiding.
+async function sendResultReadyEmail({ to, firstName, examTitle, invitationToken, result }) {
   const url = `${env.FRONTEND_URL}/exam/${invitationToken}`;
+  const resultHtml = result
+    ? `<p style="font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 500; margin: 8px 0;">${result.percentage}%</p>
+       <p>${result.score} / ${result.totalPoints} points · pass mark ${result.passMark}% · <strong>${result.passed ? 'Passed' : 'Not passed'}</strong></p>`
+    : `<p>Your submission for <strong>${examTitle}</strong> has been graded.</p>`;
   await send({
     to,
     subject: `Your result for ${examTitle} is ready`,
     html: layout(`
       <p>Hello ${firstName},</p>
-      <p>Your submission for <strong>${examTitle}</strong> has been graded.</p>
+      ${resultHtml}
       <p><a href="${url}" style="background:#1F2937;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View your result</a></p>
     `),
   });
