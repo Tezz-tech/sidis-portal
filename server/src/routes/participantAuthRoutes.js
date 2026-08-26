@@ -20,6 +20,7 @@ router.patch('/attempt/answers/:questionId', validate(saveAnswerSchema), partici
 router.post('/attempt/integrity', validate(integrityEventSchema), participantAuthController.recordIntegrity);
 router.post('/attempt/submit', participantAuthController.submit);
 router.get('/attempt/result', participantAuthController.getResult);
+router.get('/attempt/result/pdf', participantAuthController.getResultPdf);
 router.post('/logout', participantAuthController.logout);
 
 module.exports = router;

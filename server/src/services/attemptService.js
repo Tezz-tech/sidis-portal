@@ -1,4 +1,4 @@
-const { Attempt, Invitation, Exam, Question } = require('../models');
+const { Attempt, Invitation, Exam, Question, Participant } = require('../models');
 const { shuffle } = require('../utils/shuffle');
 const AppError = require('../utils/AppError');
 const { finalizeSubmission, processGradingJob } = require('./gradingService');
@@ -193,7 +193,10 @@ async function getStatus(session) {
 // once status is no longer 'submitted'.
 const GRADING_STUCK_THRESHOLD_MS = 20 * 1000;
 
-async function getParticipantResult(session) {
+// Shared by the JSON result endpoint and the PDF export so the two can
+// never show different numbers or disagree on whether a result is visible
+// yet — the PDF is just another rendering of exactly this.
+async function loadParticipantResult(session) {
   const attempt = await Attempt.findOne({ invitation: session.invitationId }).sort({ createdAt: -1 });
   if (!attempt) throw new AppError('No attempt found', 404, 'NOT_FOUND');
   const { exam } = await loadContext(session);
@@ -203,46 +206,88 @@ async function getParticipantResult(session) {
   }
 
   if (attempt.status !== 'graded') {
-    return { status: attempt.status, ready: false };
+    return { attempt, exam, result: { status: attempt.status, ready: false } };
   }
-
   if (exam.config.resultVisibility === 'never') {
-    return { status: 'graded', ready: false, message: 'Results for this exam are not shared with participants.' };
+    return { attempt, exam, result: { status: 'graded', ready: false, message: 'Results for this exam are not shared with participants.' } };
   }
   if (exam.config.resultVisibility === 'after_close' && exam.status !== 'closed') {
-    return { status: 'graded', ready: false, message: 'Results will be available after the exam closes.' };
+    return { attempt, exam, result: { status: 'graded', ready: false, message: 'Results will be available after the exam closes.' } };
   }
 
-  const breakdown = exam.config.showCorrectAnswers
-    ? await buildBreakdown(attempt, exam)
-    : undefined;
+  const breakdown = exam.config.showCorrectAnswers ? await buildBreakdown(attempt, exam) : undefined;
 
   return {
-    status: 'graded',
-    ready: true,
-    score: attempt.score,
-    totalPoints: exam.totalPoints,
-    percentage: attempt.percentage,
-    passed: attempt.passed,
-    passMark: exam.config.passMark,
-    breakdown,
+    attempt,
+    exam,
+    result: {
+      status: 'graded',
+      ready: true,
+      score: attempt.score,
+      totalPoints: exam.totalPoints,
+      percentage: attempt.percentage,
+      passed: attempt.passed,
+      passMark: exam.config.passMark,
+      breakdown,
+    },
   };
+}
+
+async function getParticipantResult(session) {
+  const { result } = await loadParticipantResult(session);
+  return result;
+}
+
+/**
+ * Same visibility rules as getParticipantResult, but throws instead of
+ * returning a "not ready" payload — the PDF endpoint has nothing sensible
+ * to render for a result that isn't visible yet — and additionally resolves
+ * the participant's name for the document header.
+ */
+async function getParticipantResultForExport(session) {
+  const { attempt, exam, result } = await loadParticipantResult(session);
+  if (!result.ready) {
+    throw new AppError(result.message || 'Your result is not ready yet.', 400, 'RESULT_NOT_READY');
+  }
+  const participant = await Participant.findById(attempt.participant);
+  return { result, examTitle: exam.title, participantName: `${participant.firstName} ${participant.lastName}` };
 }
 
 async function buildBreakdown(attempt, exam) {
   const questions = await Question.find({ exam: exam._id });
   const questionsById = new Map(questions.map((q) => [q._id.toString(), q]));
-  return attempt.answers.map((a) => {
-    const q = questionsById.get(a.question.toString());
+
+  // Show questions in the order the participant actually saw them, not
+  // whatever order they happen to sit in the answers array.
+  const orderedQuestionIds = attempt.questionOrder && attempt.questionOrder.length
+    ? attempt.questionOrder.map((id) => id.toString())
+    : attempt.answers.map((a) => a.question.toString());
+
+  return orderedQuestionIds.map((qid) => {
+    const q = questionsById.get(qid);
+    const a = attempt.answers.find((ans) => ans.question.toString() === qid);
+    if (!q || !a) return null;
+
+    const optionText = (key) => q.options?.find((o) => o.key === key)?.text ?? null;
+    const isObjective = q.type !== 'short_answer';
+
     return {
       prompt: q.prompt,
       type: q.type,
-      yourAnswer: a.selectedOptionKey || a.textAnswer,
-      correctAnswer: q.type === 'short_answer' ? q.expectedAnswer : q.correctOptionKey,
+      options: isObjective ? q.options : undefined,
+      yourAnswer: isObjective ? optionText(a.selectedOptionKey) : a.textAnswer,
+      correctAnswer: isObjective ? optionText(q.correctOptionKey) : q.expectedAnswer,
+      // The AI already produces this during short-answer grading (see
+      // gradeShortAnswers in gradingService.js) but it was only ever stored,
+      // never shown — this is the "why" for how a short-answer question
+      // was scored. Objective questions have no equivalent: exact-match
+      // against the correct option needs no separate explanation.
+      explanation: isObjective ? null : a.aiReasoning || null,
       isCorrect: a.isCorrect,
       pointsAwarded: a.pointsAwarded,
+      pointsPossible: q.points,
     };
-  });
+  }).filter(Boolean);
 }
 
 module.exports = {
@@ -253,5 +298,6 @@ module.exports = {
   loadContext,
   getStatus,
   getParticipantResult,
+  getParticipantResultForExport,
   finalizeIfOverdue,
 };

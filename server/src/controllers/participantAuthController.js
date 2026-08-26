@@ -1,6 +1,7 @@
 const participantAuthService = require('../services/participantAuthService');
 const attemptService = require('../services/attemptService');
 const gradingService = require('../services/gradingService');
+const { generateResultPdf } = require('../services/resultPdfService');
 const { setParticipantSessionCookie, clearParticipantSessionCookie } = require('../utils/cookies');
 
 async function getInvite(req, res, next) {
@@ -95,6 +96,18 @@ async function getResult(req, res, next) {
   }
 }
 
+async function getResultPdf(req, res, next) {
+  try {
+    const { result, examTitle, participantName } = await attemptService.getParticipantResultForExport(req.participantSession);
+    const safeTitle = examTitle.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'exam';
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}-result.pdf"`);
+    generateResultPdf({ result, examTitle, participantName }).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function logout(req, res, next) {
   try {
     clearParticipantSessionCookie(req, res);
@@ -115,5 +128,6 @@ module.exports = {
   submit,
   getStatus,
   getResult,
+  getResultPdf,
   logout,
 };
