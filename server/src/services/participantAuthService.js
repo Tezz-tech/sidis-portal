@@ -44,6 +44,11 @@ async function getInvitePreview(token) {
     allowRetakes: exam.config.allowRetakes,
     participantFirstName: participant.firstName,
     invitationStatus: invitation.status,
+    // So the instructions screen can show a countdown / "closed" state
+    // up front instead of only finding out when /attempt/start rejects it.
+    opensAt: exam.config.opensAt,
+    closesAt: exam.config.closesAt,
+    examStatus: exam.status,
   };
 }
 

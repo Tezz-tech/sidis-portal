@@ -5,6 +5,7 @@ import api from '../../lib/api';
 import Button from '../../components/ui/Button';
 import { RegistrationMarks } from '../../components/ui/Card';
 import { pageEnter } from '../../lib/motion';
+import { useCountdown, formatDuration } from '../../hooks/useCountdown';
 
 export default function Instructions() {
   const { token } = useParams();
@@ -15,7 +16,36 @@ export default function Instructions() {
     queryFn: () => api.get(`/api/exam/invite/${token}`).then((r) => r.data),
   });
 
+  // useCountdown returns null (not 0) while the deadline itself isn't known
+  // yet, so these stay false until `invite` loads — and once it does, a
+  // closesAt in the past resolves to 0 on the very first render, not just
+  // after ticking down, so a page opened after the exam already ended shows
+  // the right state immediately.
+  const secondsUntilOpen = useCountdown(invite?.opensAt);
+  const secondsUntilClose = useCountdown(invite?.closesAt);
+  const isNotYetOpen = Boolean(invite?.opensAt) && secondsUntilOpen > 0;
+  const isClosed = invite?.examStatus === 'closed' || (Boolean(invite?.closesAt) && secondsUntilClose === 0);
+
   if (!invite) return null;
+
+  if (isClosed) {
+    return (
+      <motion.div {...pageEnter} className="text-center py-16">
+        <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
+        <p className="text-body text-graphite">This exam has closed and is no longer accepting attempts.</p>
+      </motion.div>
+    );
+  }
+
+  if (isNotYetOpen) {
+    return (
+      <motion.div {...pageEnter} className="text-center py-16">
+        <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
+        <p className="text-body text-graphite mb-6">This exam hasn&rsquo;t opened yet. It opens in:</p>
+        <p className="font-mono text-[40px] text-ink tabular-nums">{formatDuration(secondsUntilOpen)}</p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div {...pageEnter}>

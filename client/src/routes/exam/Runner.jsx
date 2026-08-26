@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
@@ -8,32 +9,11 @@ import api, { apiErrorMessage } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import BubbleRow from '../../components/ui/BubbleRow';
+import { useCountdown, formatDuration } from '../../hooks/useCountdown';
+import { pageEnter } from '../../lib/motion';
 
 const AUTOSAVE_INTERVAL_MS = 10000;
 const DEBOUNCE_MS = 800;
-
-// `deadline` is undefined until the /attempt/start query resolves. Returning
-// null in that window (instead of computing against some placeholder "now")
-// matters: a placeholder deadline resolves to 0 seconds left, and that stale
-// 0 survives into the render where state first loads (useState's initializer
-// only runs once, on mount) — which used to trip the auto-submit effect
-// below immediately on start, before the real deadline was ever read.
-function useCountdown(deadline) {
-  const [secondsLeft, setSecondsLeft] = useState(() => (
-    deadline ? Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)) : null
-  ));
-
-  useEffect(() => {
-    if (!deadline) return undefined;
-    setSecondsLeft(Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)));
-    const interval = setInterval(() => {
-      setSecondsLeft(Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [deadline]);
-
-  return secondsLeft;
-}
 
 export default function Runner() {
   const { token } = useParams();
@@ -47,7 +27,7 @@ export default function Runner() {
   const debounceTimers = useRef({});
   const submittedRef = useRef(false);
 
-  const { data: state } = useQuery({
+  const { data: state, error: startError } = useQuery({
     queryKey: ['attempt-start'],
     queryFn: () => api.post('/api/exam/attempt/start').then((r) => r.data),
     retry: false,
@@ -136,6 +116,20 @@ export default function Runner() {
     [questions, answers],
   );
 
+  // A failed /attempt/start (exam not open yet, already closed, already
+  // attempted, deadline passed...) used to leave this page completely
+  // blank — the only trace was a 400 in the browser's network tab, with no
+  // on-screen explanation at all.
+  if (startError) {
+    return (
+      <motion.div {...pageEnter} className="text-center py-16">
+        <h1 className="font-display text-page-title text-ink mb-2">Can&rsquo;t start this exam</h1>
+        <p className="text-body text-graphite mb-8">{apiErrorMessage(startError, 'Something went wrong starting this exam.')}</p>
+        <Button variant="secondary" onClick={() => navigate(`/exam/${token}/instructions`)}>Back to instructions</Button>
+      </motion.div>
+    );
+  }
+
   if (!state || !current || secondsLeft === null) return null;
 
   const setAnswer = (patch) => {
@@ -167,7 +161,7 @@ export default function Runner() {
         <div className="flex items-center gap-3">
           {savedAt && <span className="text-small text-pencil font-mono hidden sm:inline">Saved</span>}
           <span className={clsx('font-mono text-timer tabular-nums', isLowTime ? 'text-marker timer-pulse' : 'text-ink')}>
-            {formatTime(secondsLeft)}
+            {formatDuration(secondsLeft)}
           </span>
         </div>
       </div>
@@ -269,12 +263,4 @@ export default function Runner() {
       </Modal>
     </div>
   );
-}
-
-function formatTime(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  return `${m}:${String(s).padStart(2, '0')}`;
 }
