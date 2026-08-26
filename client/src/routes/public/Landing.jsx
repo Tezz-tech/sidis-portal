@@ -29,7 +29,11 @@ export default function Landing() {
     <div>
       {/* Hero */}
       <section className="bg-gradient-to-br from-gray-950 via-black to-gray-950 pt-10 pb-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center">
+        {/* items-start, not items-center: the demo card on the right grows
+            taller as its steps reveal over several seconds — items-center
+            would keep re-centering the row against that growing sibling and
+            drag this text down with it as the animation played out. */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-start">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
               Turn a document into a{' '}
