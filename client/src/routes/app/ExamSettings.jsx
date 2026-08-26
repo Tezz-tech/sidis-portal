@@ -104,6 +104,11 @@ export default function ExamSettings() {
 
       <Card className="mb-6 space-y-4">
         <CardTitle>Results</CardTitle>
+        {isLocked && (
+          <p className="text-small text-graphite">
+            This exam is already live — everything else is locked, but you can still change when results are shown.
+          </p>
+        )}
         <div>
           <Label htmlFor="resultVisibility">When can participants see results?</Label>
           <Select id="resultVisibility" value={config.resultVisibility} onChange={(e) => setConfig((c) => ({ ...c, resultVisibility: e.target.value }))}>
@@ -116,7 +121,7 @@ export default function ExamSettings() {
       </Card>
 
       <div className="flex items-center justify-between">
-        <Button variant="secondary" onClick={() => saveMutation.mutate(config)} disabled={isLocked || saveMutation.isPending}>
+        <Button variant="secondary" onClick={() => saveMutation.mutate(config)} disabled={saveMutation.isPending}>
           {saveMutation.isPending ? 'Saving...' : 'Save settings'}
         </Button>
         {exam.status === 'review' && exam.reviewConfirmedAt && (

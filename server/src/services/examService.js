@@ -31,12 +31,30 @@ async function getExam(tenant, id) {
   return exam;
 }
 
+// These two only control how results are communicated after the fact —
+// unlike duration/dates/shuffle/retakes, changing them mid- or post-exam
+// doesn't affect fairness for anyone already attempting it, so they stay
+// editable even on a live/closed exam. Without this, a creator who
+// published before visiting the settings page (or just left the default)
+// had no way to ever change when participants can see their results.
+const RESULT_DISPLAY_FIELDS = new Set(['resultVisibility', 'showCorrectAnswers']);
+
 async function updateConfig(tenant, id, config) {
   const exam = await getExam(tenant, id);
-  if (exam.status === 'published' || exam.status === 'closed') {
-    throw new AppError('This exam is already live and its settings can no longer be changed', 400, 'EXAM_LOCKED');
+  const isLocked = exam.status === 'published' || exam.status === 'closed';
+  const current = exam.config.toObject();
+
+  if (isLocked) {
+    const touchesLockedField = Object.entries(config).some(([key, value]) => {
+      if (RESULT_DISPLAY_FIELDS.has(key)) return false;
+      return JSON.stringify(value) !== JSON.stringify(current[key]);
+    });
+    if (touchesLockedField) {
+      throw new AppError('This exam is already live — only result-visibility settings can still be changed', 400, 'EXAM_LOCKED');
+    }
   }
-  exam.config = { ...exam.config.toObject(), ...config };
+
+  exam.config = { ...current, ...config };
   if (config.title) exam.title = config.title;
   await exam.save();
   return exam;
