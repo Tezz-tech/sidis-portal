@@ -29,13 +29,14 @@ export default function Landing() {
   return (
     <div>
       {/* Hero — two columns: illustration + copy + CTAs on the left, the
-          live-generation demo card on the right. The demo card now has a
-          fixed height (see DemoSequence.jsx) instead of one that grows as
-          its steps reveal, so this row's height never changes after first
-          render — items-center is safe here and stays put for the whole
-          animation instead of drifting. */}
+          live-generation demo card on the right. The demo card grows
+          naturally as its steps reveal (so the whole sequence stays visible
+          from the top instead of being clipped/scrolled), which means this
+          row's height changes over the animation — items-start keeps this
+          column anchored instead of re-centering (and drifting) against
+          that growing sibling. */}
       <section className="bg-gradient-to-br from-gray-950 via-black to-gray-950 pt-16 pb-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-start">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <motion.img
               src={studyToolkit}

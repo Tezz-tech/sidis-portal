@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Check } from 'lucide-react';
 
@@ -31,7 +31,6 @@ const STEPS = [
 
 export default function DemoSequence() {
   const [visibleCount, setVisibleCount] = useState(0);
-  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (visibleCount >= STEPS.length) return undefined;
@@ -40,25 +39,15 @@ export default function DemoSequence() {
     return () => clearTimeout(t);
   }, [visibleCount]);
 
-  // A fixed height (not min-height) matters here: this card sits beside the
-  // hero text in a two-column row, and used to grow taller as each step
-  // revealed — which kept re-centering the whole row and dragging the text
-  // sibling down with it. Fixed height + auto-scroll keeps the outer card
-  // size constant for the life of the component, so the row it's in never
-  // resizes.
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [visibleCount]);
-
   const visible = STEPS.slice(0, visibleCount);
 
   return (
-    <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-6 h-[420px] flex flex-col">
-      <div className="flex items-center gap-2 mb-5 text-xs font-bold tracking-widest text-orange-400 uppercase shrink-0">
+    <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-6 min-h-[420px]">
+      <div className="flex items-center gap-2 mb-5 text-xs font-bold tracking-widest text-orange-400 uppercase">
         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
         Live generation
       </div>
-      <div ref={scrollRef} className="space-y-3 overflow-y-auto scrollbar-none">
+      <div className="space-y-3">
         <AnimatePresence initial={false}>
           {visible.map((step, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>

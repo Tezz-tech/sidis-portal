@@ -66,14 +66,6 @@
   .bubble[data-current='true'] {
     @apply outline outline-2 outline-ink outline-offset-2;
   }
-
-  .scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 @keyframes shimmer {
