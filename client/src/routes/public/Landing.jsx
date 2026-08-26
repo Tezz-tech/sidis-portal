@@ -4,6 +4,7 @@ import { Upload, ShieldCheck, Wallet, Brain, FileText, PenSquare, CheckCircle2, 
 import DemoSequence from './DemoSequence';
 import MarketingButton from './marketing/MarketingButton';
 import GlassCard from './marketing/GlassCard';
+import studyToolkit from '../../assets/study-toolkit.svg';
 
 const FEATURES = [
   { icon: Upload, title: 'From document to test', body: 'Upload a PDF or Word file. Pick a question count and difficulty. Every question cites the exact passage it came from.', color: 'from-orange-500 to-pink-600' },
@@ -35,6 +36,15 @@ export default function Landing() {
             drag this text down with it as the animation played out. */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-start">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
+            <motion.img
+              src={studyToolkit}
+              alt=""
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-36 md:w-44 h-auto mb-6 -ml-2"
+            />
+
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
               Turn a document into a{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">
