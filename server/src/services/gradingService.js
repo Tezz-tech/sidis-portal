@@ -1,7 +1,6 @@
 const { z } = require('zod');
 const { Attempt, Question, Exam, Invitation } = require('../models');
 const { callGemini } = require('./aiClient');
-const env = require('../config/env');
 const creditService = require('./creditService');
 const { enqueueGrading } = require('../jobs/queue');
 const { runInBackground } = require('../utils/runInBackground');
@@ -136,7 +135,6 @@ Participant's response: ${item.answer.textAnswer || '(no answer given)'}`)
     .join('\n\n')}\n\nReturn JSON only, one result per item, using the exact questionId given.`;
 
   const raw = await callGemini({
-    model: env.AI_GRADING_MODEL,
     systemInstruction: system,
     prompt: userPrompt,
     maxOutputTokens: Math.min(4096, 300 * shortAnswerItems.length + 512),

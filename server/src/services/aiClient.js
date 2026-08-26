@@ -1,59 +1,117 @@
 const { GoogleGenAI } = require('@google/genai');
 const env = require('../config/env');
 const logger = require('../config/logger');
+const AppError = require('../utils/AppError');
 
-const client = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+// Ordered fallback chain, most-capable first. A model is only tried once
+// every model ahead of it has failed or hit its rate limit on the current
+// key. Overridable via AI_MODELS (comma-separated) without a code change.
+const DEFAULT_MODEL_CHAIN = [
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-3-flash',
+  'gemini-2.5-flash',
+];
 
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
+const MODELS = env.AI_MODELS.length > 0 ? env.AI_MODELS : DEFAULT_MODEL_CHAIN;
+const API_KEYS = env.AI_API_KEYS;
+
+const MAX_ATTEMPTS_PER_MODEL = 2;
+const RETRY_DELAY_MS = 400;
+
+const clientsByKey = new Map();
+function clientFor(apiKey) {
+  if (!clientsByKey.has(apiKey)) clientsByKey.set(apiKey, new GoogleGenAI({ apiKey }));
+  return clientsByKey.get(apiKey);
+}
+
+// Sticky pointer to whichever key last succeeded, so a warm process doesn't
+// re-walk keys it already knows are exhausted on every single call.
+let activeKeyIndex = 0;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function classify(err) {
+  const status = err?.status ?? err?.code ?? err?.error?.code;
+  const message = err?.message || '';
+  const isAuthError = status === 401 || status === 403
+    || (/api[_ ]?key/i.test(message) && /invalid|expired|not valid|missing/i.test(message));
+  const isQuotaError = status === 429 || status === 'RESOURCE_EXHAUSTED';
+  const isTransient = (typeof status === 'number' && status >= 500) || /network|timeout|ECONNRESET|fetch failed/i.test(message);
+  return { isAuthError, isQuotaError, isTransient };
+}
 
 /**
- * Wraps a Gemini call with exponential-backoff retry and structured logging
- * of token usage per organization, as required by the AI integration spec.
- * Always requests JSON output (every caller in this app wants structured
- * data back) and returns the response text directly — Gemini's native JSON
- * mode means there's no prose-wrapped answer to pick apart, unlike the
- * regex-based extraction the previous provider needed.
+ * Generates text via the configured provider, transparently walking a
+ * fallback chain of models and, once every model is exhausted on the
+ * current key (rate limit or outage), rotating to the next API key. This is
+ * how the app stays usable on free-tier quotas without anyone noticing a
+ * limit was ever hit. Every attempt is logged internally with which
+ * model/key slot was used, but a caller only ever sees plain response text
+ * back or a generic AppError — never the provider, model, or key.
  */
-async function callGemini({ model, systemInstruction, prompt, maxOutputTokens = 4096, temperature, organizationId = null, label = 'unlabeled' }) {
-  let lastError;
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
-    try {
-      const response = await client.models.generateContent({
-        model,
-        contents: prompt,
-        config: {
-          systemInstruction,
-          responseMimeType: 'application/json',
-          maxOutputTokens,
-          ...(temperature != null ? { temperature } : {}),
-        },
-      });
+async function callGemini({ systemInstruction, prompt, maxOutputTokens = 4096, temperature, organizationId = null, label = 'unlabeled' }) {
+  if (API_KEYS.length === 0) {
+    logger.error({ label }, 'AI call attempted with no API keys configured');
+    throw new AppError('The AI service is not configured yet. Please try again later.', 503, 'AI_UNAVAILABLE');
+  }
 
-      logger.info(
-        {
-          organizationId,
-          label,
-          model,
-          inputTokens: response.usageMetadata?.promptTokenCount,
-          outputTokens: response.usageMetadata?.candidatesTokenCount,
-          attempt,
-        },
-        'AI call completed',
-      );
+  let lastErr;
+  for (let k = 0; k < API_KEYS.length; k += 1) {
+    const keySlot = (activeKeyIndex + k) % API_KEYS.length;
+    const client = clientFor(API_KEYS[keySlot]);
+    let keyIsDead = false;
 
-      return response.text;
-    } catch (err) {
-      lastError = err;
-      const status = err.status || err.code || err?.error?.code;
-      const retryable = status === 429 || (typeof status === 'number' && status >= 500);
-      logger.warn({ err: err.message, attempt, label, retryable }, 'AI call failed');
-      if (!retryable || attempt === MAX_RETRIES) break;
-      const delay = BASE_DELAY_MS * 2 ** (attempt - 1);
-      await new Promise((resolve) => setTimeout(resolve, delay));
+    for (let m = 0; m < MODELS.length; m += 1) {
+      const model = MODELS[m];
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_MODEL; attempt += 1) {
+        try {
+          const response = await client.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+              systemInstruction,
+              responseMimeType: 'application/json',
+              maxOutputTokens,
+              ...(temperature != null ? { temperature } : {}),
+            },
+          });
+
+          activeKeyIndex = keySlot;
+          logger.info({
+            organizationId,
+            label,
+            model,
+            keySlot,
+            attempt,
+            inputTokens: response.usageMetadata?.promptTokenCount,
+            outputTokens: response.usageMetadata?.candidatesTokenCount,
+          }, 'AI call completed');
+          return response.text;
+        } catch (err) {
+          lastErr = err;
+          const { isAuthError, isQuotaError, isTransient } = classify(err);
+          logger.warn({ err: err.message, label, model, keySlot, attempt, isAuthError, isQuotaError, isTransient }, 'AI call attempt failed');
+
+          if (isAuthError) { keyIsDead = true; break; }
+          if (isQuotaError) break; // no point retrying a rate limit — fall through to the next model
+          if (!isTransient || attempt === MAX_ATTEMPTS_PER_MODEL) break; // non-transient, or out of retries — fall through to the next model
+          await sleep(RETRY_DELAY_MS * attempt);
+        }
+      }
+
+      if (keyIsDead) break; // this key itself is bad, skip its remaining models and rotate keys
     }
   }
-  throw lastError;
+
+  logger.error({ label, organizationId, err: lastErr?.message }, 'AI call exhausted every model and key');
+  throw new AppError('The AI service is temporarily unavailable. Please try again shortly.', 503, 'AI_UNAVAILABLE');
 }
 
 module.exports = { callGemini };

@@ -11,9 +11,14 @@ const schema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
 
+  // A single key still works, but GEMINI_API_KEYS (comma-separated) is the
+  // primary mechanism — the AI client rotates through all of them once every
+  // model in its fallback chain hits its rate limit on the current one.
   GEMINI_API_KEY: z.string().min(1).optional(),
-  AI_GENERATION_MODEL: z.string().default('gemini-3.7-flash'),
-  AI_GRADING_MODEL: z.string().default('gemini-3.7-flash'),
+  GEMINI_API_KEYS: z.string().min(1).optional(),
+  // Comma-separated override for the model fallback chain. Leave unset to
+  // use the AI client's own built-in default chain.
+  AI_MODELS: z.string().min(1).optional(),
 
   PAYSTACK_SECRET_KEY: z.string().optional(),
   PAYSTACK_PUBLIC_KEY: z.string().optional(),
@@ -60,4 +65,16 @@ const env = parsed.success ? parsed.data : schema.parse({
   JWT_REFRESH_SECRET: rawEnv.JWT_REFRESH_SECRET || 'test'.repeat(10),
 });
 
-module.exports = env;
+function splitCsv(value) {
+  return (value || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// Dedupe in case the same key was pasted into both GEMINI_API_KEY and
+// GEMINI_API_KEYS while migrating between the two.
+const AI_API_KEYS = [...new Set([...splitCsv(env.GEMINI_API_KEYS), ...splitCsv(env.GEMINI_API_KEY)])];
+const AI_MODELS = splitCsv(env.AI_MODELS);
+
+module.exports = { ...env, AI_API_KEYS, AI_MODELS };

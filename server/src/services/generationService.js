@@ -1,6 +1,5 @@
 const { z } = require('zod');
 const { callGemini } = require('./aiClient');
-const env = require('../config/env');
 const AppError = require('../utils/AppError');
 
 // Roughly 4 characters per token; keep a wide safety margin under the model's
@@ -74,13 +73,11 @@ Return JSON only, matching the schema described in the system prompt.`;
 }
 
 async function callAndParse({ passage, count, typeMix, difficulty, organizationId }) {
-  const model = env.AI_GENERATION_MODEL;
   const system = buildSystemPrompt();
   const userPrompt = buildUserPrompt({ passage, count, typeMix, difficulty });
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const raw = await callGemini({
-      model,
       systemInstruction: system,
       prompt: userPrompt,
       maxOutputTokens: Math.min(8192, 400 * count + 1024),

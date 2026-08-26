@@ -3,7 +3,6 @@ const { Question, Exam, Document } = require('../models');
 const AppError = require('../utils/AppError');
 const examService = require('./examService');
 const { callGemini } = require('./aiClient');
-const env = require('../config/env');
 
 async function assertEditable(tenant, examId) {
   const exam = await examService.getExam(tenant, examId);
@@ -91,7 +90,6 @@ ${others.map((q) => `- ${q.prompt}`).join('\n') || '(none)'}
 Write one replacement question of type "${existing.type}". Return JSON only.`;
 
   const raw = await callGemini({
-    model: env.AI_GENERATION_MODEL,
     systemInstruction: system,
     prompt: userPrompt,
     maxOutputTokens: 1024,
