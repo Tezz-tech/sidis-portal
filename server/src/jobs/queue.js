@@ -4,11 +4,15 @@ const { runGenerationJobNow, releaseFullReservation, RETRYABLE_STEPS } = require
 const { runInBackground } = require('../utils/runInBackground');
 const logger = require('../config/logger');
 
-// How long to wait before treating a job as stuck. Generously above any
-// realistic single-step duration, but short enough that a user watching the
-// progress screen isn't stuck waiting for long — the frontend already polls
-// every ~1.5s, so recovery kicks in on the very next poll once this elapses.
-const STUCK_THRESHOLD_MS = 20 * 1000;
+// How long to wait before treating a job as stuck. The 'writing' step covers
+// the actual AI call, which can legitimately run long — the model/key
+// rotation in aiClient.js falls through several models with retries and
+// backoff before giving up, and a multi-chunk document makes several of
+// those sequentially. 20s was tripping on ordinary rotation latency, not
+// just genuinely dead jobs; the exam-level claim in generationWorker.js is
+// the actual duplicate-run guard now, so this only needs to be generous
+// enough to avoid firing on real, still-progressing work.
+const STUCK_THRESHOLD_MS = 90 * 1000;
 
 /**
  * Kicks off question generation. Returns the created job (not just its id)

@@ -54,7 +54,15 @@ export default function VerifyCode() {
     setVerifying(true);
     try {
       await api.post(`/api/exam/invite/${token}/verify-code`, { code });
-      navigate(`/exam/${token}/instructions`);
+      // A participant re-verifying via the same invite link (e.g. clicking
+      // "view your result" from the graded-result email) already has an
+      // attempt in some state — route them straight there instead of
+      // always landing on the Start Exam screen, which would error out for
+      // an already-submitted attempt.
+      const { data: status } = await api.get('/api/exam/attempt/status');
+      if (status.status === 'in_progress') navigate(`/exam/${token}/runner`);
+      else if (status.status === 'submitted' || status.status === 'graded') navigate(`/exam/${token}/result`);
+      else navigate(`/exam/${token}/instructions`);
     } catch (err) {
       toast.error(apiErrorMessage(err, 'That code is incorrect or has expired'));
       setDigits(Array(6).fill(''));

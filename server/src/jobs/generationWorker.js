@@ -35,9 +35,33 @@ async function releaseFullReservation(data) {
   }).catch((releaseErr) => logger.error({ releaseErr }, 'Failed to release credits after generation failure'));
 }
 
+// Only reverts a genuine failure by the execution that actually won the
+// claim (status is still 'generating') — a run that lost the claim never
+// got this far, so there's nothing here for it to undo.
+async function revertClaim(data) {
+  const tenant = buildTenant(data);
+  await scoped(Exam, tenant).updateOne({ _id: data.examId, status: 'generating' }, { status: 'draft' })
+    .catch((revertErr) => logger.error({ revertErr }, 'Failed to revert exam status after generation failure'));
+}
+
 async function process(job) {
   const { examId, documentId, count, typeMix, difficulty, organizationId, requestedBy, requesterEmail, requesterFirstName } = job.attrs.data;
   const tenant = buildTenant(job.attrs.data);
+
+  // Atomic claim: only one execution of this exam's generation may ever
+  // reach the AI call and insert questions. Without this, a double-clicked
+  // "Generate" request (two jobs, exam.status still 'draft' for both until
+  // this line) or the self-healing stuck-job retry below racing a
+  // legitimately slow AI call (see queue.js) would both run to completion
+  // and insert two full batches of questions for the same exam. A lost
+  // claim means some other execution already owns this exam's generation,
+  // so this one exits quietly — it does not touch credits or progress,
+  // since exactly one winner is responsible for the reservation's lifecycle.
+  const claim = await scoped(Exam, tenant).updateOne({ _id: examId, status: 'draft' }, { status: 'generating' });
+  if (claim.matchedCount === 0) {
+    logger.warn({ jobId: job.attrs._id?.toString(), examId }, 'Generation already claimed for this exam — skipping duplicate run');
+    return;
+  }
 
   await updateProgress(job, { step: 'reading', percent: 10 });
 
@@ -141,6 +165,7 @@ async function runGenerationJobNow(job) {
     await job.save();
   } catch (err) {
     await releaseFullReservation(job.attrs.data);
+    await revertClaim(job.attrs.data);
     job.attrs.failReason = err.message;
     job.attrs.lastFinishedAt = new Date();
     await job.save();
@@ -154,6 +179,7 @@ function defineGenerationJob(agenda) {
       await process(job);
     } catch (err) {
       await releaseFullReservation(job.attrs.data);
+      await revertClaim(job.attrs.data);
       throw err;
     }
   });

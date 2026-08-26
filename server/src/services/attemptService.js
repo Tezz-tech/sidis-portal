@@ -2,9 +2,11 @@ const { Attempt, Invitation, Exam, Question } = require('../models');
 const { shuffle } = require('../utils/shuffle');
 const AppError = require('../utils/AppError');
 const { finalizeSubmission, processGradingJob } = require('./gradingService');
+const { autoCloseIfOverdue } = require('./deadlineSweepService');
 const { runInBackground } = require('../utils/runInBackground');
 
 async function loadContext(session) {
+  await autoCloseIfOverdue(session.examId);
   const [invitation, exam] = await Promise.all([
     Invitation.findOne({ _id: session.invitationId, organization: session.organizationId }),
     Exam.findOne({ _id: session.examId, organization: session.organizationId }),
@@ -36,6 +38,9 @@ async function getOrCreateAttempt(session) {
   const existingInProgress = await Attempt.findOne({ invitation: invitation._id, status: 'in_progress' });
   if (existingInProgress) return existingInProgress;
 
+  if (exam.status !== 'published') {
+    throw new AppError('This exam is not currently open for new attempts', 400, 'EXAM_CLOSED');
+  }
   const attemptCount = await Attempt.countDocuments({ invitation: invitation._id });
   if (attemptCount > 0 && !exam.config.allowRetakes) {
     throw new AppError('You have already completed this exam', 400, 'ALREADY_ATTEMPTED');

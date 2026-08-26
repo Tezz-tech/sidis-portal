@@ -88,6 +88,32 @@ async function sendGenerationCompleteEmail({ to, firstName, examTitle, questionC
   });
 }
 
+async function sendResultReadyEmail({ to, firstName, examTitle, invitationToken }) {
+  const url = `${env.FRONTEND_URL}/exam/${invitationToken}`;
+  await send({
+    to,
+    subject: `Your result for ${examTitle} is ready`,
+    html: layout(`
+      <p>Hello ${firstName},</p>
+      <p>Your submission for <strong>${examTitle}</strong> has been graded.</p>
+      <p><a href="${url}" style="background:#1F2937;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View your result</a></p>
+    `),
+  });
+}
+
+async function sendAttemptCompleteToInstructorEmail({ to, firstName, examTitle, participantName, examId }) {
+  const url = `${env.FRONTEND_URL}/app/exams/${examId}/results`;
+  await send({
+    to,
+    subject: `${participantName} completed ${examTitle}`,
+    html: layout(`
+      <p>Hello ${firstName},</p>
+      <p><strong>${participantName}</strong> has completed and been graded on <strong>${examTitle}</strong>.</p>
+      <p><a href="${url}" style="background:#1F2937;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View results</a></p>
+    `),
+  });
+}
+
 async function sendLowCreditEmail({ to, organizationName, balance }) {
   await send({
     to,
@@ -118,6 +144,8 @@ module.exports = {
   sendExamInviteEmail,
   sendParticipantCodeEmail,
   sendGenerationCompleteEmail,
+  sendResultReadyEmail,
+  sendAttemptCompleteToInstructorEmail,
   sendLowCreditEmail,
   sendReceiptEmail,
 };

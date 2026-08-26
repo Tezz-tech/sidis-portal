@@ -15,8 +15,8 @@ import Input, { Label, FieldError } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import { pageEnter } from '../../lib/motion';
 
-const STATUS_VARIANT = { draft: 'neutral', review: 'marker', published: 'ink', closed: 'neutral' };
-const STATUS_LABEL = { draft: 'Draft', review: 'In review', published: 'Published', closed: 'Closed' };
+const STATUS_VARIANT = { draft: 'neutral', generating: 'marker', review: 'marker', published: 'ink', closed: 'neutral' };
+const STATUS_LABEL = { draft: 'Draft', generating: 'Generating', review: 'In review', published: 'Published', closed: 'Closed' };
 
 export default function ExamsList() {
   const location = useLocation();
@@ -143,7 +143,7 @@ export default function ExamsList() {
 }
 
 function examLink(exam) {
-  if (exam.status === 'draft') return `/app/exams/${exam._id}/generate`;
+  if (exam.status === 'draft' || exam.status === 'generating') return `/app/exams/${exam._id}/generate`;
   if (exam.status === 'review') return `/app/exams/${exam._id}/review`;
   return `/app/exams/${exam._id}/results`;
 }

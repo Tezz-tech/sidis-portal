@@ -7,7 +7,7 @@ const examSchema = new Schema(
     sourceDocument: { type: Schema.Types.ObjectId, ref: 'Document', default: null },
     title: { type: String, required: true, trim: true },
     description: { type: String, default: '' },
-    status: { type: String, enum: ['draft', 'review', 'published', 'closed'], default: 'draft', index: true },
+    status: { type: String, enum: ['draft', 'generating', 'review', 'published', 'closed'], default: 'draft', index: true },
     config: {
       durationMinutes: { type: Number, default: 60 },
       opensAt: { type: Date, default: null },

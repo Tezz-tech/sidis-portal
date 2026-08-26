@@ -12,10 +12,20 @@ import BubbleRow from '../../components/ui/BubbleRow';
 const AUTOSAVE_INTERVAL_MS = 10000;
 const DEBOUNCE_MS = 800;
 
+// `deadline` is undefined until the /attempt/start query resolves. Returning
+// null in that window (instead of computing against some placeholder "now")
+// matters: a placeholder deadline resolves to 0 seconds left, and that stale
+// 0 survives into the render where state first loads (useState's initializer
+// only runs once, on mount) — which used to trip the auto-submit effect
+// below immediately on start, before the real deadline was ever read.
 function useCountdown(deadline) {
-  const [secondsLeft, setSecondsLeft] = useState(() => Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)));
+  const [secondsLeft, setSecondsLeft] = useState(() => (
+    deadline ? Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)) : null
+  ));
 
   useEffect(() => {
+    if (!deadline) return undefined;
+    setSecondsLeft(Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)));
     const interval = setInterval(() => {
       setSecondsLeft(Math.max(0, Math.round((new Date(deadline) - Date.now()) / 1000)));
     }, 1000);
@@ -56,7 +66,7 @@ export default function Runner() {
     setFlagged(initialFlagged);
   }, [state]);
 
-  const secondsLeft = useCountdown(state?.serverDeadlineAt || Date.now());
+  const secondsLeft = useCountdown(state?.serverDeadlineAt);
 
   const submitMutation = useMutation({
     mutationFn: () => api.post('/api/exam/attempt/submit'),
@@ -126,7 +136,7 @@ export default function Runner() {
     [questions, answers],
   );
 
-  if (!state || !current) return null;
+  if (!state || !current || secondsLeft === null) return null;
 
   const setAnswer = (patch) => {
     setAnswers((prev) => ({ ...prev, [current.id]: { ...prev[current.id], ...patch } }));

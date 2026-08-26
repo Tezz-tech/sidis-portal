@@ -1,9 +1,10 @@
 const { z } = require('zod');
-const { Attempt, Question, Exam, Invitation } = require('../models');
+const { Attempt, Question, Exam, Invitation, Participant, User } = require('../models');
 const { callGemini } = require('./aiClient');
 const creditService = require('./creditService');
 const { enqueueGrading } = require('../jobs/queue');
 const { runInBackground } = require('../utils/runInBackground');
+const emailService = require('./emailService');
 const logger = require('../config/logger');
 
 const LOW_CONFIDENCE_THRESHOLD = 0.7;
@@ -94,7 +95,43 @@ async function computeFinalScore(attemptId) {
   attempt.status = 'graded';
   attempt.gradedAt = new Date();
   await attempt.save();
+
+  // Best-effort — a failed notification must never fail grading itself,
+  // which has already been persisted above.
+  notifyAttemptGraded(attempt, exam).catch((err) => logger.warn({ err, attemptId: attempt._id.toString() }, 'Failed to send grading-complete emails'));
+
   return attempt;
+}
+
+async function notifyAttemptGraded(attempt, exam) {
+  const [invitation, participant, creator] = await Promise.all([
+    Invitation.findById(attempt.invitation),
+    Participant.findById(attempt.participant),
+    User.findById(exam.createdBy),
+  ]);
+  if (!invitation || !participant) return;
+
+  // resultVisibility 'never' means there's genuinely nothing for the
+  // participant to view — skip their email rather than send a "your result
+  // is ready" link that leads to a page saying results aren't shared.
+  if (exam.config.resultVisibility !== 'never') {
+    await emailService.sendResultReadyEmail({
+      to: participant.email,
+      firstName: participant.firstName,
+      examTitle: exam.title,
+      invitationToken: invitation.token,
+    });
+  }
+
+  if (creator) {
+    await emailService.sendAttemptCompleteToInstructorEmail({
+      to: creator.email,
+      firstName: creator.firstName,
+      examTitle: exam.title,
+      participantName: `${participant.firstName} ${participant.lastName}`,
+      examId: exam._id.toString(),
+    });
+  }
 }
 
 const shortAnswerGradingResponseSchema = z.object({
