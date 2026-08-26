@@ -1,6 +1,6 @@
 const { z } = require('zod');
 const { Attempt, Question, Exam, Invitation } = require('../models');
-const { callClaude, extractJsonText } = require('./aiClient');
+const { callGemini } = require('./aiClient');
 const env = require('../config/env');
 const creditService = require('./creditService');
 const { enqueueGrading } = require('../jobs/queue');
@@ -135,16 +135,15 @@ Maximum points: ${item.question.points}
 Participant's response: ${item.answer.textAnswer || '(no answer given)'}`)
     .join('\n\n')}\n\nReturn JSON only, one result per item, using the exact questionId given.`;
 
-  const response = await callClaude({
+  const raw = await callGemini({
     model: env.AI_GRADING_MODEL,
-    system,
-    messages: [{ role: 'user', content: userPrompt }],
-    maxTokens: Math.min(4096, 300 * shortAnswerItems.length + 512),
+    systemInstruction: system,
+    prompt: userPrompt,
+    maxOutputTokens: Math.min(4096, 300 * shortAnswerItems.length + 512),
     organizationId: attempt.organization.toString(),
     label: 'short_answer_grading',
   });
 
-  const raw = extractJsonText(response);
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
   const result = shortAnswerGradingResponseSchema.parse(parsed);

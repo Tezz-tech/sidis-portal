@@ -14,7 +14,7 @@
     "check:tenancy": "node scripts/checkTenancy.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/genai": "^2.19.0",
     "@vercel/functions": "^3.9.5",
     "agenda": "^5.0.0",
     "bcryptjs": "^2.4.3",

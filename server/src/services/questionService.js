@@ -2,7 +2,7 @@ const { scoped } = require('./scopedRepo');
 const { Question, Exam, Document } = require('../models');
 const AppError = require('../utils/AppError');
 const examService = require('./examService');
-const { callClaude, extractJsonText } = require('./aiClient');
+const { callGemini } = require('./aiClient');
 const env = require('../config/env');
 
 async function assertEditable(tenant, examId) {
@@ -90,16 +90,15 @@ ${others.map((q) => `- ${q.prompt}`).join('\n') || '(none)'}
 
 Write one replacement question of type "${existing.type}". Return JSON only.`;
 
-  const response = await callClaude({
+  const raw = await callGemini({
     model: env.AI_GENERATION_MODEL,
-    system,
-    messages: [{ role: 'user', content: userPrompt }],
-    maxTokens: 1024,
+    systemInstruction: system,
+    prompt: userPrompt,
+    maxOutputTokens: 1024,
     organizationId: tenant.organizationId,
     label: 'question_regenerate',
   });
 
-  const raw = extractJsonText(response);
   let parsed;
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);

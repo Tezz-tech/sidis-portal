@@ -1,5 +1,5 @@
 const { z } = require('zod');
-const { callClaude, extractJsonText } = require('./aiClient');
+const { callGemini } = require('./aiClient');
 const env = require('../config/env');
 const AppError = require('../utils/AppError');
 
@@ -79,16 +79,15 @@ async function callAndParse({ passage, count, typeMix, difficulty, organizationI
   const userPrompt = buildUserPrompt({ passage, count, typeMix, difficulty });
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const response = await callClaude({
+    const raw = await callGemini({
       model,
-      system,
-      messages: [{ role: 'user', content: userPrompt }],
-      maxTokens: Math.min(8192, 400 * count + 1024),
+      systemInstruction: system,
+      prompt: userPrompt,
+      maxOutputTokens: Math.min(8192, 400 * count + 1024),
       organizationId,
       label: 'question_generation',
     });
 
-    const raw = extractJsonText(response);
     let parsed;
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);

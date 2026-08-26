@@ -11,9 +11,9 @@ const schema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
 
-  ANTHROPIC_API_KEY: z.string().min(1).optional(),
-  AI_GENERATION_MODEL: z.string().default('claude-sonnet-5'),
-  AI_GRADING_MODEL: z.string().default('claude-haiku-4-5-20251001'),
+  GEMINI_API_KEY: z.string().min(1).optional(),
+  AI_GENERATION_MODEL: z.string().default('gemini-3.7-flash'),
+  AI_GRADING_MODEL: z.string().default('gemini-3.7-flash'),
 
   PAYSTACK_SECRET_KEY: z.string().optional(),
   PAYSTACK_PUBLIC_KEY: z.string().optional(),
@@ -30,10 +30,20 @@ const schema = z.object({
   PLATFORM_OWNER_PASSWORD: z.string().optional(),
 });
 
-const parsed = schema.safeParse(process.env);
+// A blank value in .env (KEY=, with nothing after the `=`) is dotenv-set as
+// an empty string, not left unset — which would otherwise fail a `.min(1)`
+// check even though the field is `.optional()`. Since an empty string is
+// never a meaningful value for anything in this schema, it's normalized to
+// "not set" here so leaving an optional secret blank while scaffolding a
+// .env file doesn't crash the whole app.
+const rawEnv = Object.fromEntries(
+  Object.entries(process.env).map(([key, value]) => [key, value === '' ? undefined : value]),
+);
+
+const parsed = schema.safeParse(rawEnv);
 
 if (!parsed.success) {
-  const isTest = process.env.NODE_ENV === 'test';
+  const isTest = rawEnv.NODE_ENV === 'test';
   if (!isTest) {
     // eslint-disable-next-line no-console
     console.error('Invalid environment configuration:');
@@ -44,10 +54,10 @@ if (!parsed.success) {
 }
 
 const env = parsed.success ? parsed.data : schema.parse({
-  ...process.env,
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/SidisPortalTest',
-  JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'test'.repeat(10),
-  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'test'.repeat(10),
+  ...rawEnv,
+  MONGODB_URI: rawEnv.MONGODB_URI || 'mongodb://127.0.0.1:27017/SidisPortalTest',
+  JWT_ACCESS_SECRET: rawEnv.JWT_ACCESS_SECRET || 'test'.repeat(10),
+  JWT_REFRESH_SECRET: rawEnv.JWT_REFRESH_SECRET || 'test'.repeat(10),
 });
 
 module.exports = env;
