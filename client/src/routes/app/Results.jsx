@@ -24,8 +24,7 @@ export default function Results() {
 
   return (
     <motion.div {...pageEnter}>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-page-title text-ink">Results</h1>
+      <div className="flex items-center justify-end mb-8">
         <Button variant="secondary" onClick={handleExport}>
           <Download size={16} strokeWidth={1.5} /> Export CSV
         </Button>

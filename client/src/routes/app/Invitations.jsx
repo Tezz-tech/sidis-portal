@@ -80,9 +80,6 @@ export default function Invitations() {
 
   return (
     <motion.div {...pageEnter}>
-      <h1 className="font-display text-page-title text-ink mb-2">Invitations</h1>
-      <p className="text-body text-graphite mb-8">{exam.title}</p>
-
       {!isPublished && (
         <>
           {exam.status !== 'review' || !exam.reviewConfirmedAt ? (

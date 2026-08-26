@@ -70,8 +70,7 @@ export default function ExamSettings() {
 
   return (
     <motion.div {...pageEnter} className="max-w-2xl">
-      <h1 className="font-display text-page-title text-ink mb-2">Exam settings</h1>
-      <p className="text-body text-graphite mb-8">{exam.title}</p>
+      <p className="text-body text-graphite mb-8">Configure timing, behaviour, and how results are shared.</p>
 
       <Card className="space-y-6 mb-6">
         <CardTitle>Timing</CardTitle>

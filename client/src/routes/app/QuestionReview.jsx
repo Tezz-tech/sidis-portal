@@ -7,6 +7,7 @@ import { Pencil, Trash2, RefreshCw, ChevronUp, ChevronDown, Plus, Check, Quote }
 import api, { apiErrorMessage } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import Modal from '../../components/ui/Modal';
 import { SkeletonRows } from '../../components/ui/Skeleton';
 import QuestionEditorModal from './QuestionEditorModal';
 import { pageEnter } from '../../lib/motion';
@@ -20,6 +21,7 @@ export default function QuestionReview() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(null); // 'new' | question object | null
   const [regeneratingId, setRegeneratingId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // question object, or null
 
   const { data: exam } = useQuery({
     queryKey: ['exam', examId],
@@ -47,7 +49,7 @@ export default function QuestionReview() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => api.delete(`/api/exams/${examId}/questions/${id}`),
-    onSuccess: () => { invalidate(); toast.success('Question removed'); },
+    onSuccess: () => { invalidate(); setDeleteConfirm(null); toast.success('Question removed'); },
     onError: (err) => toast.error(apiErrorMessage(err)),
   });
 
@@ -79,29 +81,35 @@ export default function QuestionReview() {
     reorderMutation.mutate(next.map((q) => q._id));
   };
 
-  const isLocked = exam && exam.status !== 'draft' && exam.status !== 'review';
+  // Question content stays editable at any exam status — a creator managing
+  // a live exam needs to be able to fix or remove a bad question, not just
+  // view it (the server enforces this too; see questionService.assertEditable).
+  const isPastReview = exam && exam.status !== 'draft' && exam.status !== 'review';
 
   return (
     <motion.div {...pageEnter}>
       <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="font-display text-page-title text-ink">{exam?.title || 'Review questions'}</h1>
-          <p className="text-body text-graphite mt-1">
-            {questions?.length ?? 0} questions · {exam?.totalPoints ?? 0} points
-          </p>
-        </div>
+        <p className="text-body text-graphite">
+          {questions?.length ?? 0} questions · {exam?.totalPoints ?? 0} points
+        </p>
         <div className="flex items-center gap-3">
-          <Button variant="secondary" onClick={() => setEditing('new')} disabled={isLocked}>
+          <Button variant="secondary" onClick={() => setEditing('new')}>
             <Plus size={16} strokeWidth={1.5} /> Add question
           </Button>
-          <Button
-            variant="marker"
-            onClick={() => confirmMutation.mutate()}
-            disabled={isLocked || exam?.status === 'published' || confirmMutation.isPending || !questions?.length}
-          >
-            <Check size={16} strokeWidth={1.5} />
-            {exam?.reviewConfirmedAt ? 'Confirmed' : 'Confirm question set'}
-          </Button>
+          {isPastReview ? (
+            <Badge variant="pass">
+              <Check size={14} strokeWidth={1.5} /> {exam.status === 'published' ? 'Published' : exam.status === 'closed' ? 'Closed' : 'Confirmed'}
+            </Badge>
+          ) : (
+            <Button
+              variant="marker"
+              onClick={() => confirmMutation.mutate()}
+              disabled={confirmMutation.isPending || !questions?.length}
+            >
+              <Check size={16} strokeWidth={1.5} />
+              {exam?.reviewConfirmedAt ? 'Confirmed' : 'Confirm question set'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -118,15 +126,21 @@ export default function QuestionReview() {
                 <span className="text-small text-pencil font-mono">{q.points} pt{q.points === 1 ? '' : 's'}</span>
               </div>
               <div className="flex items-center gap-1">
-                <IconButton label="Move up" onClick={() => move(i, -1)} disabled={i === 0 || isLocked}><ChevronUp size={16} strokeWidth={1.5} /></IconButton>
-                <IconButton label="Move down" onClick={() => move(i, 1)} disabled={i === questions.length - 1 || isLocked}><ChevronDown size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton label="Move up" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton label="Move down" onClick={() => move(i, 1)} disabled={i === questions.length - 1}><ChevronDown size={16} strokeWidth={1.5} /></IconButton>
                 {q.source !== 'manual' && (
-                  <IconButton label="Regenerate" onClick={() => regenerateMutation.mutate(q._id)} disabled={isLocked || regeneratingId === q._id}>
+                  <IconButton label="Regenerate" onClick={() => regenerateMutation.mutate(q._id)} disabled={regeneratingId === q._id}>
                     <RefreshCw size={16} strokeWidth={1.5} className={regeneratingId === q._id ? 'animate-spin' : ''} />
                   </IconButton>
                 )}
-                <IconButton label="Edit" onClick={() => setEditing(q)} disabled={isLocked}><Pencil size={16} strokeWidth={1.5} /></IconButton>
-                <IconButton label="Delete" onClick={() => deleteMutation.mutate(q._id)} disabled={isLocked} danger><Trash2 size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton label="Edit" onClick={() => setEditing(q)}><Pencil size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton
+                  label="Delete"
+                  onClick={() => (isPastReview ? setDeleteConfirm(q) : deleteMutation.mutate(q._id))}
+                  danger
+                >
+                  <Trash2 size={16} strokeWidth={1.5} />
+                </IconButton>
               </div>
             </div>
 
@@ -171,6 +185,26 @@ export default function QuestionReview() {
         onSave={(form) => saveMutation.mutate(editing === 'new' ? form : { ...form, _id: editing._id })}
         saving={saveMutation.isPending}
       />
+
+      <Modal
+        open={Boolean(deleteConfirm)}
+        onClose={() => setDeleteConfirm(null)}
+        title="Delete this question?"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+            <Button variant="danger" disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(deleteConfirm._id)}>
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete question'}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-body text-graphite">
+          This exam is {exam?.status} — participants may already have attempted it. Deleting this question removes it
+          from the question set for anyone attempting the exam from now on, and it will no longer appear in past
+          participants&rsquo; result breakdowns.
+        </p>
+      </Modal>
     </motion.div>
   );
 }

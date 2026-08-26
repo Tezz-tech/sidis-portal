@@ -66,7 +66,7 @@ export default function GenerateQuestions() {
     const currentIndex = STEPS.findIndex((s) => s.key === progress?.step);
     return (
       <motion.div {...pageEnter} className="max-w-lg mx-auto py-12">
-        <h1 className="font-display text-page-title text-ink text-center mb-8">Generating questions</h1>
+        <p className="text-body text-graphite text-center mb-8">Generating questions&hellip;</p>
         <Card>
           <ul className="space-y-4">
             {STEPS.map((step, i) => {
@@ -94,8 +94,7 @@ export default function GenerateQuestions() {
 
   return (
     <motion.div {...pageEnter} className="max-w-lg mx-auto py-12">
-      <h1 className="font-display text-page-title text-ink mb-2">Generate questions</h1>
-      <p className="text-body text-graphite mb-8">{exam?.title}</p>
+      <p className="text-body text-graphite mb-8">Choose how many questions to generate from the source document, and how they should be mixed.</p>
 
       <Card className="space-y-6">
         <div>

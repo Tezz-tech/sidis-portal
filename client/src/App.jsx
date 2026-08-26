@@ -14,6 +14,7 @@ import AdminLayout from './routes/app/AdminLayout';
 import Dashboard from './routes/app/Dashboard';
 import Documents from './routes/app/Documents';
 import ExamsList from './routes/app/ExamsList';
+import ExamDetailLayout from './routes/app/ExamDetailLayout';
 import GenerateQuestions from './routes/app/GenerateQuestions';
 import QuestionReview from './routes/app/QuestionReview';
 import ExamSettings from './routes/app/ExamSettings';
@@ -66,13 +67,15 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="documents" element={<Documents />} />
         <Route path="exams" element={<ExamsList />} />
-        <Route path="exams/:examId/generate" element={<GenerateQuestions />} />
-        <Route path="exams/:examId/review" element={<QuestionReview />} />
-        <Route path="exams/:examId/settings" element={<ExamSettings />} />
-        <Route path="exams/:examId/invitations" element={<Invitations />} />
-        <Route path="exams/:examId/monitor" element={<LiveMonitor />} />
-        <Route path="exams/:examId/results" element={<Results />} />
-        <Route path="exams/:examId/results/:attemptId" element={<ResultDetail />} />
+        <Route path="exams/:examId" element={<ExamDetailLayout />}>
+          <Route path="generate" element={<GenerateQuestions />} />
+          <Route path="review" element={<QuestionReview />} />
+          <Route path="settings" element={<ExamSettings />} />
+          <Route path="invitations" element={<Invitations />} />
+          <Route path="monitor" element={<LiveMonitor />} />
+          <Route path="results" element={<Results />} />
+          <Route path="results/:attemptId" element={<ResultDetail />} />
+        </Route>
         <Route path="participants" element={<Participants />} />
         <Route path="billing" element={<Billing />} />
         <Route path="billing/callback" element={<BillingCallback />} />

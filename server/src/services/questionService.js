@@ -4,12 +4,13 @@ const AppError = require('../utils/AppError');
 const examService = require('./examService');
 const { callGemini } = require('./aiClient');
 
+// Question content stays editable regardless of exam status (including
+// published/closed) — a creator managing a live exam needs to be able to
+// fix or remove a bad question, not just view it. This only fetches the
+// exam (still enforcing tenant scoping via examService.getExam); it no
+// longer blocks based on status.
 async function assertEditable(tenant, examId) {
-  const exam = await examService.getExam(tenant, examId);
-  if (exam.status === 'published' || exam.status === 'closed') {
-    throw new AppError('This exam is already live and its questions can no longer be changed', 400, 'EXAM_LOCKED');
-  }
-  return exam;
+  return examService.getExam(tenant, examId);
 }
 
 async function listQuestions(tenant, examId) {

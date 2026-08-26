@@ -39,6 +39,34 @@ async function getOrganization(organizationId) {
   return { ...org, examCount, attemptCount, admins };
 }
 
+function slugify(name) {
+  const base = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  return base || 'workspace';
+}
+
+async function generateUniqueSlug(name) {
+  const base = slugify(name);
+  let candidate = base;
+  let suffix = 1;
+  // eslint-disable-next-line no-await-in-loop
+  while (await Organization.exists({ slug: candidate })) {
+    suffix += 1;
+    candidate = `${base}-${suffix}`;
+  }
+  return candidate;
+}
+
+/**
+ * The public "Request a workspace" form's equivalent of createOrganization —
+ * same underlying action (org + invited admin + invite email + audit log),
+ * just triggered by an unauthenticated visitor instead of the platform
+ * owner, so there's no createdBy actor and no user-chosen slug to validate.
+ */
+async function createSelfServeOrganization({ name, type, adminEmail, adminFirstName, adminLastName }) {
+  const slug = await generateUniqueSlug(name);
+  return createOrganization({ name, slug, type, adminEmail, adminFirstName, adminLastName, createdBy: null });
+}
+
 async function createOrganization({ name, slug, type, adminEmail, adminFirstName, adminLastName, createdBy }) {
   const existingSlug = await Organization.findOne({ slug });
   if (existingSlug) {
@@ -171,6 +199,7 @@ module.exports = {
   listOrganizations,
   getOrganization,
   createOrganization,
+  createSelfServeOrganization,
   setStatus,
   updateOrganization,
   listOrgTeam,

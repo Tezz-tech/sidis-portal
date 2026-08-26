@@ -11,7 +11,8 @@ import Card from '../../components/ui/Card';
 
 const schema = z.object({
   organizationName: z.string().min(1, 'Enter your organization name'),
-  contactName: z.string().min(1, 'Enter your name'),
+  firstName: z.string().min(1, 'Enter your first name'),
+  lastName: z.string().min(1, 'Enter your last name'),
   email: z.string().email('Enter a valid email'),
   phone: z.string().optional(),
   organizationType: z.enum(['school', 'company', 'other']),
@@ -27,7 +28,7 @@ export default function RequestWorkspace() {
   const onSubmit = async (values) => {
     try {
       await api.post('/api/public/leads', values);
-      toast.success('Request sent. We will be in touch shortly.');
+      toast.success('Your workspace is ready — check your email to set your password.');
     } catch (err) {
       toast.error(apiErrorMessage(err));
     }
@@ -37,12 +38,12 @@ export default function RequestWorkspace() {
     <div className="max-w-lg mx-auto px-6 py-16">
       <h1 className="font-display text-page-title text-ink mb-2">Request a workspace</h1>
       <p className="text-body text-graphite mb-8">
-        Tell us about your organization. We will set up your workspace and send an admin invite.
+        Tell us about your organization. Your workspace is created immediately and we&rsquo;ll email you an admin invite.
       </p>
 
       {isSubmitSuccessful ? (
         <Card>
-          <p className="text-body text-ink">Thank you. We have received your request and will reach out by email shortly.</p>
+          <p className="text-body text-ink">Your workspace has been created. Check your email for a link to set your password and sign in.</p>
         </Card>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -59,10 +60,17 @@ export default function RequestWorkspace() {
               <option value="other">Other</option>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="contactName">Your name</Label>
-            <Input id="contactName" {...register('contactName')} />
-            <FieldError>{errors.contactName?.message}</FieldError>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">First name</Label>
+              <Input id="firstName" {...register('firstName')} />
+              <FieldError>{errors.firstName?.message}</FieldError>
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last name</Label>
+              <Input id="lastName" {...register('lastName')} />
+              <FieldError>{errors.lastName?.message}</FieldError>
+            </div>
           </div>
           <div>
             <Label htmlFor="email">Work email</Label>

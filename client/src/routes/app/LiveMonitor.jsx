@@ -29,7 +29,6 @@ export default function LiveMonitor() {
 
   return (
     <motion.div {...pageEnter}>
-      <h1 className="font-display text-page-title text-ink mb-2">Live monitor</h1>
       <p className="text-body text-graphite mb-8">Updates automatically while the exam is open.</p>
 
       {!isLoading && rows?.length === 0 && (

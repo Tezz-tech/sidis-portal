@@ -25,4 +25,16 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { loginLimiter, otpRequestLimiter, apiLimiter };
+// Request Workspace creates a real organization + admin account immediately
+// (see organizationService.createSelfServeOrganization) — unlike a plain
+// lead-capture form, this is worth protecting from being scripted.
+const leadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  message: { error: { message: 'Too many workspace requests from this network. Try again later.', code: 'RATE_LIMITED' } },
+});
+
+module.exports = { loginLimiter, otpRequestLimiter, apiLimiter, leadLimiter };
