@@ -2,8 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
-import Button from '../../components/ui/Button';
-import { RegistrationMarks } from '../../components/ui/Card';
+import Button from '../../components/console/Button';
 import { pageEnter } from '../../lib/motion';
 import { useCountdown, formatDuration } from '../../hooks/useCountdown';
 
@@ -31,8 +30,8 @@ export default function Instructions() {
   if (isClosed) {
     return (
       <motion.div {...pageEnter} className="text-center py-16">
-        <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
-        <p className="text-body text-graphite">This exam has closed and is no longer accepting attempts.</p>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-2">{invite.examTitle}</h1>
+        <p className="text-gray-400">This exam has closed and is no longer accepting attempts.</p>
       </motion.div>
     );
   }
@@ -40,35 +39,35 @@ export default function Instructions() {
   if (isNotYetOpen) {
     return (
       <motion.div {...pageEnter} className="text-center py-16">
-        <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
-        <p className="text-body text-graphite mb-6">This exam hasn&rsquo;t opened yet. It opens in:</p>
-        <p className="font-mono text-[40px] text-ink tabular-nums">{formatDuration(secondsUntilOpen)}</p>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-2">{invite.examTitle}</h1>
+        <p className="text-gray-400 mb-6">This exam hasn&rsquo;t opened yet. It opens in:</p>
+        <p className="font-mono text-4xl text-white tabular-nums">{formatDuration(secondsUntilOpen)}</p>
       </motion.div>
     );
   }
 
   return (
     <motion.div {...pageEnter}>
-      <RegistrationMarks className="bg-paper border border-rule rounded-card p-8">
-        <h1 className="font-display text-page-title text-ink mb-1">{invite.examTitle}</h1>
-        <p className="text-body text-graphite mb-8">Read the instructions below before you begin.</p>
+      <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-8">
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-1">{invite.examTitle}</h1>
+        <p className="text-gray-400 mb-8">Read the instructions below before you begin.</p>
 
-        <dl className="grid grid-cols-3 gap-4 mb-8 pb-8 border-b border-rule">
+        <dl className="grid grid-cols-3 gap-4 mb-8 pb-8 border-b border-white/10">
           <div>
-            <dt className="text-label text-graphite mb-1">Duration</dt>
-            <dd className="font-mono text-[20px] text-ink tabular-nums">{invite.durationMinutes} min</dd>
+            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Duration</dt>
+            <dd className="font-mono text-xl text-white tabular-nums">{invite.durationMinutes} min</dd>
           </div>
           <div>
-            <dt className="text-label text-graphite mb-1">Questions</dt>
-            <dd className="font-mono text-[20px] text-ink tabular-nums">{invite.questionCount}</dd>
+            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Questions</dt>
+            <dd className="font-mono text-xl text-white tabular-nums">{invite.questionCount}</dd>
           </div>
           <div>
-            <dt className="text-label text-graphite mb-1">Pass mark</dt>
-            <dd className="font-mono text-[20px] text-ink tabular-nums">{invite.passMark}%</dd>
+            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Pass mark</dt>
+            <dd className="font-mono text-xl text-white tabular-nums">{invite.passMark}%</dd>
           </div>
         </dl>
 
-        <ul className="space-y-3 mb-8 text-body text-graphite list-disc list-inside">
+        <ul className="space-y-3 mb-8 text-gray-300 list-disc list-inside">
           <li>Once you start, the timer cannot be paused. It continues even if you close this tab.</li>
           <li>Your answers are saved automatically as you go.</li>
           <li>You can flag questions to come back to before submitting.</li>
@@ -79,7 +78,7 @@ export default function Instructions() {
         <Button variant="marker" size="lg" className="w-full" onClick={() => navigate(`/exam/${token}/runner`)}>
           Start exam
         </Button>
-      </RegistrationMarks>
+      </div>
     </motion.div>
   );
 }

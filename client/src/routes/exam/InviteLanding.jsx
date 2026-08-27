@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
+import Button from '../../components/console/Button';
 import { pageEnter } from '../../lib/motion';
 
 export default function InviteLanding() {
@@ -20,7 +20,7 @@ export default function InviteLanding() {
   if (isError) {
     return (
       <motion.div {...pageEnter} className="text-center py-16">
-        <p className="text-body text-graphite">{apiErrorMessage(error, 'This invitation link is not valid.')}</p>
+        <p className="text-gray-400">{apiErrorMessage(error, 'This invitation link is not valid.')}</p>
       </motion.div>
     );
   }
@@ -44,12 +44,12 @@ export default function InviteLanding() {
       {invite.organizationLogoUrl ? (
         <img src={invite.organizationLogoUrl} alt={invite.organizationName} className="h-10 mx-auto mb-6" />
       ) : (
-        <p className="text-label text-graphite mb-6">{invite.organizationName}</p>
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">{invite.organizationName}</p>
       )}
-      <h1 className="font-display text-page-title text-ink mb-2">{invite.examTitle}</h1>
-      <p className="text-body text-graphite mb-8">{introText}</p>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-2">{invite.examTitle}</h1>
+      <p className="text-gray-400 mb-8">{introText}</p>
       {!alreadySubmitted && (
-        <div className="flex justify-center gap-8 text-small text-graphite mb-10 font-mono">
+        <div className="flex justify-center gap-8 text-sm text-gray-400 mb-10 font-mono">
           <span>{invite.durationMinutes} minutes</span>
           <span>{invite.questionCount} questions</span>
           <span>{invite.passMark}% to pass</span>

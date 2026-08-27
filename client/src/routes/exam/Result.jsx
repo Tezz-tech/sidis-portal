@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { Check, X, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import { RegistrationMarks } from '../../components/ui/Card';
+import Button from '../../components/console/Button';
 import { pageEnter } from '../../lib/motion';
 
 export default function Result() {
@@ -41,39 +40,39 @@ export default function Result() {
   if (!result.ready) {
     return (
       <motion.div {...pageEnter} className="text-center py-16">
-        <h1 className="font-display text-page-title text-ink mb-2">Preparing your result</h1>
-        <p className="text-body text-graphite">{result.message || 'This will only take a moment.'}</p>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Preparing your result</h1>
+        <p className="text-gray-400">{result.message || 'This will only take a moment.'}</p>
       </motion.div>
     );
   }
 
   return (
     <motion.div {...pageEnter}>
-      <RegistrationMarks className="bg-paper border border-rule rounded-card p-8 text-center mb-8">
-        <p className="text-label text-graphite mb-3">{result.passed ? 'Passed' : 'Not passed'}</p>
-        <p className="font-mono text-[48px] text-ink tabular-nums leading-none mb-2">{result.percentage}%</p>
-        <p className="text-body text-graphite font-mono mb-6">{result.score} / {result.totalPoints} points · pass mark {result.passMark}%</p>
+      <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-8 text-center mb-8">
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{result.passed ? 'Passed' : 'Not passed'}</p>
+        <p className="font-mono text-6xl text-white tabular-nums leading-none mb-2">{result.percentage}%</p>
+        <p className="text-gray-400 font-mono mb-6">{result.score} / {result.totalPoints} points · pass mark {result.passMark}%</p>
         <Button variant="secondary" onClick={downloadPdf} disabled={downloading}>
-          <Download size={16} strokeWidth={1.5} /> {downloading ? 'Preparing PDF...' : 'Download result (PDF)'}
+          <Download size={16} strokeWidth={1.75} /> {downloading ? 'Preparing PDF...' : 'Download result (PDF)'}
         </Button>
-      </RegistrationMarks>
+      </div>
 
       {result.breakdown && (
         <div className="space-y-3">
           {result.breakdown.map((item, i) => (
-            <div key={i} className="border border-rule rounded-card p-4">
+            <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 {item.isCorrect ? (
-                  <Check size={16} strokeWidth={2} className="text-pass" />
+                  <Check size={16} strokeWidth={2} className="text-green-400" />
                 ) : (
-                  <X size={16} strokeWidth={2} className="text-fail" />
+                  <X size={16} strokeWidth={2} className="text-red-400" />
                 )}
-                <span className="font-mono text-small text-pencil">{item.pointsAwarded} / {item.pointsPossible} pts</span>
+                <span className="font-mono text-sm text-gray-500">{item.pointsAwarded} / {item.pointsPossible} pts</span>
               </div>
-              <p className="text-body text-ink mb-1">{item.prompt}</p>
-              <p className="text-small text-graphite">Your answer: {item.yourAnswer || '(no answer)'}</p>
-              {!item.isCorrect && <p className="text-small text-pass">Correct answer: {item.correctAnswer}</p>}
-              {item.explanation && <p className="text-small text-graphite italic mt-1">Why: {item.explanation}</p>}
+              <p className="text-white mb-1">{item.prompt}</p>
+              <p className="text-sm text-gray-400">Your answer: {item.yourAnswer || '(no answer)'}</p>
+              {!item.isCorrect && <p className="text-sm text-green-400">Correct answer: {item.correctAnswer}</p>}
+              {item.explanation && <p className="text-sm text-gray-500 italic mt-1">Why: {item.explanation}</p>}
             </div>
           ))}
         </div>

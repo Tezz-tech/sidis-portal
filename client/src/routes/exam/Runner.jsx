@@ -6,9 +6,9 @@ import { toast } from 'sonner';
 import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
-import BubbleRow from '../../components/ui/BubbleRow';
+import Button from '../../components/console/Button';
+import Modal from '../../components/console/Modal';
+import BubbleRow from '../../components/console/BubbleRow';
 import { useCountdown, formatDuration } from '../../hooks/useCountdown';
 import { pageEnter } from '../../lib/motion';
 
@@ -123,8 +123,8 @@ export default function Runner() {
   if (startError) {
     return (
       <motion.div {...pageEnter} className="text-center py-16">
-        <h1 className="font-display text-page-title text-ink mb-2">Can&rsquo;t start this exam</h1>
-        <p className="text-body text-graphite mb-8">{apiErrorMessage(startError, 'Something went wrong starting this exam.')}</p>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Can&rsquo;t start this exam</h1>
+        <p className="text-gray-400 mb-8">{apiErrorMessage(startError, 'Something went wrong starting this exam.')}</p>
         <Button variant="secondary" onClick={() => navigate(`/exam/${token}/instructions`)}>Back to instructions</Button>
       </motion.div>
     );
@@ -156,11 +156,11 @@ export default function Runner() {
 
   return (
     <div className="pb-32 md:pb-8">
-      <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-sheet/95 backdrop-blur border-b border-rule flex items-center justify-between mb-6">
-        <p className="text-body text-ink font-medium truncate">{state.examTitle}</p>
+      <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-gray-950/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between mb-6">
+        <p className="text-white font-medium truncate">{state.examTitle}</p>
         <div className="flex items-center gap-3">
-          {savedAt && <span className="text-small text-pencil font-mono hidden sm:inline">Saved</span>}
-          <span className={clsx('font-mono text-timer tabular-nums', isLowTime ? 'text-marker timer-pulse' : 'text-ink')}>
+          {savedAt && <span className="text-sm text-gray-500 font-mono hidden sm:inline">Saved</span>}
+          <span className={clsx('font-mono text-2xl tabular-nums', isLowTime ? 'text-red-400 timer-pulse' : 'text-white')}>
             {formatDuration(secondsLeft)}
           </span>
         </div>
@@ -169,20 +169,20 @@ export default function Runner() {
       <div className="md:grid md:grid-cols-[1fr_220px] md:gap-8">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-label text-pencil font-mono">QUESTION {currentIndex + 1} OF {questions.length}</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest font-mono">QUESTION {currentIndex + 1} OF {questions.length}</p>
             <button
               type="button"
               onClick={toggleFlag}
               className={clsx(
-                'inline-flex items-center gap-1.5 text-small px-2.5 py-1 rounded-chip border transition-colors duration-micro',
-                flagged[current.id] ? 'border-marker text-marker-deep bg-marker-wash' : 'border-rule text-graphite hover:bg-sheet',
+                'inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-lg border transition-colors duration-200',
+                flagged[current.id] ? 'border-orange-400/50 text-orange-300 bg-orange-400/10' : 'border-white/15 text-gray-400 hover:bg-white/5',
               )}
             >
-              <Flag size={14} strokeWidth={1.5} /> {flagged[current.id] ? 'Flagged' : 'Flag for review'}
+              <Flag size={14} strokeWidth={1.75} /> {flagged[current.id] ? 'Flagged' : 'Flag for review'}
             </button>
           </div>
 
-          <p className="text-body text-ink mb-6 text-[17px] leading-relaxed">{current.prompt}</p>
+          <p className="text-white mb-6 text-lg leading-relaxed">{current.prompt}</p>
 
           {(current.type === 'mcq' || current.type === 'true_false') && (
             <div className="space-y-2 mb-8">
@@ -190,8 +190,8 @@ export default function Runner() {
                 <label
                   key={opt.key}
                   className={clsx(
-                    'flex items-center gap-3 px-4 py-3 rounded-card border cursor-pointer transition-colors duration-micro',
-                    answers[current.id]?.selectedOptionKey === opt.key ? 'border-ink bg-sheet' : 'border-rule hover:bg-sheet',
+                    'flex items-center gap-3 px-4 py-3 rounded-2xl border cursor-pointer transition-colors duration-200',
+                    answers[current.id]?.selectedOptionKey === opt.key ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 hover:bg-white/5',
                   )}
                 >
                   <input
@@ -199,10 +199,10 @@ export default function Runner() {
                     name={current.id}
                     checked={answers[current.id]?.selectedOptionKey === opt.key}
                     onChange={() => setAnswer({ selectedOptionKey: opt.key })}
-                    className="accent-marker w-4 h-4"
+                    className="accent-orange-500 w-4 h-4"
                   />
-                  <span className="font-mono text-small text-pencil">{opt.key}</span>
-                  <span className="text-body text-ink">{opt.text}</span>
+                  <span className="font-mono text-sm text-gray-500">{opt.key}</span>
+                  <span className="text-white">{opt.text}</span>
                 </label>
               ))}
             </div>
@@ -213,18 +213,18 @@ export default function Runner() {
               value={answers[current.id]?.textAnswer || ''}
               onChange={(e) => setAnswer({ textAnswer: e.target.value })}
               rows={6}
-              className="w-full rounded-card border border-rule bg-paper px-4 py-3 text-body text-ink mb-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-marker focus-visible:ring-offset-2"
+              className="w-full rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl px-4 py-3 text-white placeholder-gray-500 mb-8 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all duration-200"
               placeholder="Write your answer here"
             />
           )}
 
           <div className="flex items-center justify-between">
             <Button variant="secondary" onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))} disabled={currentIndex === 0}>
-              <ChevronLeft size={16} strokeWidth={1.5} /> Previous
+              <ChevronLeft size={16} strokeWidth={1.75} /> Previous
             </Button>
             {currentIndex < questions.length - 1 ? (
               <Button onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}>
-                Next <ChevronRight size={16} strokeWidth={1.5} />
+                Next <ChevronRight size={16} strokeWidth={1.75} />
               </Button>
             ) : (
               <Button variant="marker" onClick={() => setConfirmSubmitOpen(true)}>Submit exam</Button>
@@ -233,12 +233,12 @@ export default function Runner() {
         </div>
 
         <div className="hidden md:block">
-          <p className="text-label text-graphite mb-3">Questions</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
           <BubbleRow items={bubbleItems} size="sm" onSelect={(item, i) => setCurrentIndex(i)} />
         </div>
       </div>
 
-      <div className="md:hidden fixed bottom-0 inset-x-0 bg-paper border-t border-rule px-4 py-3 overflow-x-auto">
+      <div className="md:hidden fixed bottom-0 inset-x-0 bg-gray-950/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 overflow-x-auto">
         <BubbleRow items={bubbleItems} size="sm" wrap={false} onSelect={(item, i) => setCurrentIndex(i)} />
       </div>
 
@@ -255,7 +255,7 @@ export default function Runner() {
           </>
         }
       >
-        <p className="text-body text-graphite">
+        <p className="text-gray-400">
           {unansweredCount > 0
             ? `You have ${unansweredCount} unanswered question${unansweredCount === 1 ? '' : 's'}. Once submitted, you cannot change your answers.`
             : 'All questions are answered. Once submitted, you cannot change your answers.'}

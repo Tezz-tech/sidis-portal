@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
+import Button from '../../components/console/Button';
 import { pageEnter } from '../../lib/motion';
 
 const RESEND_COOLDOWN = 30;
@@ -74,8 +74,8 @@ export default function VerifyCode() {
 
   return (
     <motion.div {...pageEnter} className="text-center py-8">
-      <h1 className="font-display text-page-title text-ink mb-2">Enter your code</h1>
-      <p className="text-body text-graphite mb-8">
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Enter your code</h1>
+      <p className="text-gray-400 mb-8">
         {maskedEmail ? `We sent a 6-digit code to ${maskedEmail}` : 'Sending your code...'}
       </p>
 
@@ -91,7 +91,7 @@ export default function VerifyCode() {
             maxLength={1}
             disabled={verifying}
             aria-label={`Digit ${i + 1}`}
-            className="w-12 h-14 text-center font-mono text-[22px] rounded-card border border-rule bg-paper focus:outline-none focus-visible:ring-2 focus-visible:ring-marker focus-visible:ring-offset-2"
+            className="w-12 h-14 text-center font-mono text-xl text-white rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all duration-200"
           />
         ))}
       </div>
