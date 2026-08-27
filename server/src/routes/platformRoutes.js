@@ -10,6 +10,7 @@ const {
   updateOrganizationSchema,
   updateOrgTeamRoleSchema,
   updateOrgTeamStatusSchema,
+  eraseOrganizationSchema,
 } = require('../validators/organizationValidators');
 const { pricingConfigSchema } = require('../validators/billingValidators');
 
@@ -32,6 +33,9 @@ router.patch('/organizations/:id/team/:userId/status', validate(updateOrgTeamSta
 
 router.get('/organizations/:id/exams', platformController.listOrgExams);
 router.post('/organizations/:id/exams/:examId/close', platformController.forceCloseExam);
+
+router.get('/organizations/:id/export', platformController.exportOrganizationData);
+router.post('/organizations/:id/erase', validate(eraseOrganizationSchema), platformController.eraseOrganizationData);
 
 router.get('/pricing', platformController.getPricingConfig);
 router.put('/pricing', validate(pricingConfigSchema), platformController.updatePricingConfig);

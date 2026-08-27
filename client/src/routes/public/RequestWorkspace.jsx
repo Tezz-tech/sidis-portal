@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { CheckCircle2, FileText, Zap, ShieldCheck } from 'lucide-react';
@@ -146,6 +147,13 @@ export default function RequestWorkspace() {
               <MarketingButton type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? 'Creating your workspace...' : 'Create my workspace'}
               </MarketingButton>
+
+              <p className="text-xs text-gray-500 text-center">
+                By continuing you agree to our{' '}
+                <Link to="/terms" className="text-gray-400 hover:text-orange-400 underline transition-colors duration-200">Terms</Link>
+                {' '}and{' '}
+                <Link to="/privacy" className="text-gray-400 hover:text-orange-400 underline transition-colors duration-200">Privacy Policy</Link>.
+              </p>
             </motion.form>
           )}
         </div>

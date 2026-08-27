@@ -5,6 +5,24 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Double-submit CSRF: the server sets a readable (non-httpOnly) csrfToken
+// cookie and only enforces it once an auth cookie is present — a
+// cross-site attacker page can't read our cookies to put the value in this
+// header (Same-Origin Policy), so this round-trip is what proves the
+// request actually came from our own frontend.
+function readCookie(name) {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+api.interceptors.request.use((config) => {
+  if (config.method && config.method.toUpperCase() !== 'GET') {
+    const token = readCookie('csrfToken');
+    if (token) config.headers['X-CSRF-Token'] = token;
+  }
+  return config;
+});
+
 let isRefreshing = false;
 let pendingQueue = [];
 

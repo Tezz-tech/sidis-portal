@@ -50,6 +50,7 @@ function clearParticipantSessionCookie(req, res) {
 }
 
 module.exports = {
+  baseOptions,
   setStaffAuthCookies,
   clearStaffAuthCookies,
   setParticipantSessionCookie,

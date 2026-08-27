@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "worker": "node src/worker.js",
     "dev:worker": "nodemon src/worker.js | pino-pretty",
+    "pretest": "npm run check:tenancy",
     "test": "jest --runInBand",
     "seed:owner": "node scripts/seedPlatformOwner.js",
     "check:tenancy": "node scripts/checkTenancy.js"

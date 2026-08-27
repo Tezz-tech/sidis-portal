@@ -8,6 +8,7 @@ const env = require('./config/env');
 const logger = require('./config/logger');
 const connectDB = require('./config/db');
 const { apiLimiter } = require('./middleware/rateLimit');
+const csrfMiddleware = require('./middleware/csrf');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const webhookRoutes = require('./routes/webhookRoutes');
 const routes = require('./routes');
@@ -52,6 +53,7 @@ app.use('/api/webhooks', webhookRoutes);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+app.use('/api', csrfMiddleware);
 app.use('/api', apiLimiter);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

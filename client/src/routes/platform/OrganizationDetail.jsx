@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -18,7 +18,12 @@ const EXAM_STATUS_VARIANT = { draft: 'neutral', generating: 'marker', review: 'm
 
 export default function OrganizationDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const [eraseOpen, setEraseOpen] = useState(false);
+  const [confirmName, setConfirmName] = useState('');
+  const [eraseError, setEraseError] = useState('');
 
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', type: 'company', logoUrl: '' });
@@ -105,6 +110,16 @@ export default function OrganizationDetail() {
     onError: (err) => toast.error(apiErrorMessage(err)),
   });
 
+  const eraseMutation = useMutation({
+    mutationFn: () => api.post(`/api/platform/organizations/${id}/erase`, { confirmName }),
+    onSuccess: () => { toast.success('Organization and all of its data have been deleted'); navigate('/admin'); },
+    onError: (err) => setEraseError(apiErrorMessage(err)),
+  });
+
+  const handleExport = () => {
+    window.open(`${api.defaults.baseURL}/api/platform/organizations/${id}/export`, '_blank');
+  };
+
   if (!org) return null;
 
   return (
@@ -121,6 +136,8 @@ export default function OrganizationDetail() {
           </Button>
           <Button variant="secondary" onClick={() => setAdjustOpen(true)}>Adjust balance</Button>
           <Button variant="marker" onClick={() => setGrantOpen(true)}>Grant credits</Button>
+          <Button variant="secondary" onClick={handleExport}>Export data</Button>
+          <Button variant="danger" onClick={() => setEraseOpen(true)}>Delete organization</Button>
         </div>
       </div>
 
@@ -330,6 +347,37 @@ export default function OrganizationDetail() {
             <Textarea id="adjust-description" value={adjustDescription} onChange={(e) => setAdjustDescription(e.target.value)} placeholder="e.g. Correcting a double-charged generation run" />
           </div>
           <FieldError>{adjustError}</FieldError>
+        </div>
+      </Modal>
+
+      <Modal
+        open={eraseOpen}
+        onClose={() => { setEraseOpen(false); setConfirmName(''); setEraseError(''); }}
+        title="Delete organization"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => { setEraseOpen(false); setConfirmName(''); setEraseError(''); }}>Cancel</Button>
+            <Button
+              variant="danger"
+              disabled={eraseMutation.isPending || confirmName !== org.name}
+              onClick={() => { setEraseError(''); eraseMutation.mutate(); }}
+            >
+              {eraseMutation.isPending ? 'Deleting...' : 'Permanently delete'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-gray-400">
+            This permanently deletes <strong className="text-white">{org.name}</strong> and everything
+            attached to it — staff accounts, participants, documents, exams, questions, invitations,
+            attempts, and billing history. This cannot be undone.
+          </p>
+          <div>
+            <Label htmlFor="confirm-name">Type <span className="text-white">{org.name}</span> to confirm</Label>
+            <Input id="confirm-name" value={confirmName} onChange={(e) => setConfirmName(e.target.value)} />
+          </div>
+          <FieldError>{eraseError}</FieldError>
         </div>
       </Modal>
     </motion.div>

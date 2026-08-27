@@ -4,6 +4,7 @@ const pricingService = require('../services/pricingService');
 const platformMetricsService = require('../services/platformMetricsService');
 const authService = require('../services/authService');
 const auditService = require('../services/auditService');
+const dataProtectionService = require('../services/dataProtectionService');
 
 async function listOrganizations(req, res, next) {
   try {
@@ -49,6 +50,14 @@ async function grantCredits(req, res, next) {
       description: req.body.description,
       createdBy: req.tenant.userId,
     });
+    await auditService.writeAuditLog({
+      organization: req.params.id,
+      actor: req.tenant.userId,
+      action: 'credit.granted',
+      targetModel: 'Organization',
+      targetId: req.params.id,
+      metadata: { amount: req.body.amount, description: req.body.description, balanceAfter: balance },
+    });
     res.json({ creditBalance: balance });
   } catch (err) {
     next(err);
@@ -62,6 +71,14 @@ async function adjustCredits(req, res, next) {
       amount: req.body.amount,
       description: req.body.description,
       createdBy: req.tenant.userId,
+    });
+    await auditService.writeAuditLog({
+      organization: req.params.id,
+      actor: req.tenant.userId,
+      action: 'credit.adjusted',
+      targetModel: 'Organization',
+      targetId: req.params.id,
+      metadata: { amount: req.body.amount, description: req.body.description, balanceAfter: balance },
     });
     res.json({ creditBalance: balance });
   } catch (err) {
@@ -177,6 +194,25 @@ async function getMetrics(req, res, next) {
   }
 }
 
+async function exportOrganizationData(req, res, next) {
+  try {
+    const data = await dataProtectionService.exportOrganizationData(req.params.id);
+    res.setHeader('Content-Disposition', `attachment; filename="organization-${req.params.id}-export.json"`);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function eraseOrganizationData(req, res, next) {
+  try {
+    await dataProtectionService.eraseOrganizationData(req.params.id, req.tenant.userId, req.body.confirmName);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listOrganizations,
   getOrganization,
@@ -196,4 +232,6 @@ module.exports = {
   listPayments,
   getMetrics,
   getAuditLog,
+  exportOrganizationData,
+  eraseOrganizationData,
 };

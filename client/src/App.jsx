@@ -8,6 +8,8 @@ import Login from './routes/public/Login';
 import AcceptInvite from './routes/public/AcceptInvite';
 import ForgotPassword from './routes/public/ForgotPassword';
 import ResetPassword from './routes/public/ResetPassword';
+import Terms from './routes/public/Terms';
+import Privacy from './routes/public/Privacy';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminLayout from './routes/app/AdminLayout';
@@ -54,6 +56,8 @@ export default function App() {
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Route>
 
       <Route

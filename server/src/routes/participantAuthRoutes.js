@@ -2,14 +2,14 @@ const { Router } = require('express');
 const participantAuthController = require('../controllers/participantAuthController');
 const validate = require('../middleware/validate');
 const { requireParticipantAuth } = require('../middleware/auth');
-const { otpRequestLimiter } = require('../middleware/rateLimit');
+const { otpRequestLimiter, otpVerifyLimiter } = require('../middleware/rateLimit');
 const { verifyCodeSchema, saveAnswerSchema, integrityEventSchema } = require('../validators/participantAuthValidators');
 
 const router = Router();
 
 router.get('/invite/:token', participantAuthController.getInvite);
 router.post('/invite/:token/request-code', otpRequestLimiter, participantAuthController.requestCode);
-router.post('/invite/:token/verify-code', validate(verifyCodeSchema), participantAuthController.verifyCode);
+router.post('/invite/:token/verify-code', otpVerifyLimiter, validate(verifyCodeSchema), participantAuthController.verifyCode);
 
 router.use(requireParticipantAuth);
 

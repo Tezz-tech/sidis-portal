@@ -32,11 +32,28 @@ async function createOrgWithAdmin(name, slugBase) {
   return { org, admin };
 }
 
+// The app's real CSRF defense (double-submit cookie) requires the
+// X-CSRF-Token header on every mutating request once a session exists.
+// supertest's agent resends the csrfToken cookie automatically but never
+// reads it back into a header the way a browser + our axios interceptor
+// does — tests have to do that wiring themselves.
+function withCsrf(agent, loginRes) {
+  const setCookie = [].concat(loginRes.headers['set-cookie'] || []);
+  const match = setCookie.map((c) => c.match(/^csrfToken=([^;]+)/)).find(Boolean);
+  const token = match ? match[1] : null;
+  if (!token) return agent;
+  ['post', 'patch', 'put', 'delete'].forEach((method) => {
+    const original = agent[method].bind(agent);
+    agent[method] = (...args) => original(...args).set('X-CSRF-Token', token);
+  });
+  return agent;
+}
+
 async function loginAs(email) {
   const agent = request.agent(app);
   const res = await agent.post('/api/auth/login').send({ email, password: PASSWORD });
   expect(res.status).toBe(200);
-  return agent;
+  return withCsrf(agent, res);
 }
 
 beforeAll(async () => {

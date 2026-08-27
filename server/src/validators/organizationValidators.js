@@ -40,6 +40,12 @@ const updateOrgTeamStatusSchema = z.object({
   status: z.enum(['active', 'disabled']),
 });
 
+// GitHub-style type-to-confirm: the caller must echo the organization's
+// exact current name back, since this action is irreversible.
+const eraseOrganizationSchema = z.object({
+  confirmName: z.string().min(1),
+});
+
 module.exports = {
   createOrganizationSchema,
   grantCreditsSchema,
@@ -48,4 +54,5 @@ module.exports = {
   updateOrganizationSchema,
   updateOrgTeamRoleSchema,
   updateOrgTeamStatusSchema,
+  eraseOrganizationSchema,
 };
