@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion';
 import { pageEnter } from '../../lib/motion';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const EFFECTIVE_DATE = 'August 27, 2026';
 
 export default function Privacy() {
+  useDocumentTitle('Privacy Policy — Sidis');
+
   return (
     <motion.div {...pageEnter} className="bg-gradient-to-b from-gray-950 to-black py-16 md:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">

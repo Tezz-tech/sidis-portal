@@ -52,6 +52,42 @@ async function sendPasswordResetEmail({ to, firstName, resetToken }) {
   });
 }
 
+async function sendWelcomeEmail({ to, firstName, organizationName }) {
+  await send({
+    to,
+    subject: `Welcome to Sidis`,
+    html: layout(`
+      <p>Hello ${firstName},</p>
+      <p>Your account is set up and you're now part of <strong>${organizationName}</strong> on Sidis. You're ready to start building and managing exams.</p>
+      <p><a href="${env.FRONTEND_URL}/login" style="background:#1F2937;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">Sign in</a></p>
+    `),
+  });
+}
+
+async function sendPasswordChangedEmail({ to, firstName }) {
+  await send({
+    to,
+    subject: 'Your Sidis password was changed',
+    html: layout(`
+      <p>Hello ${firstName},</p>
+      <p>This confirms your Sidis password was just changed. If you made this change, no action is needed.</p>
+      <p>If you didn't request this, contact us immediately — someone else may have access to your account.</p>
+    `),
+  });
+}
+
+async function sendGenerationFailedEmail({ to, firstName, examTitle, reason }) {
+  await send({
+    to,
+    subject: `${examTitle} — question generation failed`,
+    html: layout(`
+      <p>Hello ${firstName},</p>
+      <p>We couldn't generate questions for <strong>${examTitle}</strong>: ${reason}</p>
+      <p>Your credits for this attempt have been released. You can try generating again from the exam's Generate page.</p>
+    `),
+  });
+}
+
 async function sendExamInviteEmail({ to, firstName, examTitle, organizationName, invitationToken }) {
   const url = `${env.FRONTEND_URL}/exam/${invitationToken}`;
   await send({
@@ -149,6 +185,9 @@ module.exports = {
   send,
   sendInviteEmail,
   sendPasswordResetEmail,
+  sendWelcomeEmail,
+  sendPasswordChangedEmail,
+  sendGenerationFailedEmail,
   sendExamInviteEmail,
   sendParticipantCodeEmail,
   sendGenerationCompleteEmail,

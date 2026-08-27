@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { CheckCircle2, FileText, Zap, ShieldCheck } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
 import MarketingButton from './marketing/MarketingButton';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const schema = z.object({
   organizationName: z.string().min(1, 'Enter your organization name'),
@@ -46,6 +47,7 @@ function Field({ label, error, children }) {
 }
 
 export default function RequestWorkspace() {
+  useDocumentTitle('Request a workspace — Sidis');
   const { register, handleSubmit, formState: { errors, isSubmitting, isSubmitSuccessful } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { organizationType: 'company' },

@@ -5,6 +5,7 @@ import DemoSequence from './DemoSequence';
 import MarketingButton from './marketing/MarketingButton';
 import GlassCard from './marketing/GlassCard';
 import studyToolkit from '../../assets/study-toolkit.svg';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const FEATURES = [
   { icon: Upload, title: 'From document to test', body: 'Upload a PDF or Word file. Pick a question count and difficulty. Every question cites the exact passage it came from.', color: 'from-orange-500 to-pink-600' },
@@ -26,6 +27,8 @@ const CHECKLIST = [
 ];
 
 export default function Landing() {
+  useDocumentTitle('Sidis — AI-generated, auto-graded exams');
+
   return (
     <div>
       {/* Hero — two columns: illustration + copy + CTAs on the left, the

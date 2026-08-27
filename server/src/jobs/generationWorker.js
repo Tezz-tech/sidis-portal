@@ -54,6 +54,18 @@ async function revertClaim(data) {
     .catch((revertErr) => logger.error({ revertErr }, 'Failed to revert exam status after generation failure'));
 }
 
+async function notifyGenerationFailed(data, err) {
+  if (!data.requesterEmail) return;
+  const tenant = buildTenant(data);
+  const exam = await scoped(Exam, tenant).findById(data.examId).catch(() => null);
+  await emailService.sendGenerationFailedEmail({
+    to: data.requesterEmail,
+    firstName: data.requesterFirstName || 'there',
+    examTitle: exam?.title || 'your exam',
+    reason: err.message || 'An unexpected error occurred',
+  }).catch((emailErr) => logger.warn({ emailErr }, 'Failed to send generation-failed email'));
+}
+
 async function process(job) {
   const { examId, documentId, count, typeMix, difficulty, organizationId, requestedBy, requesterEmail, requesterFirstName } = job.attrs.data;
   const tenant = buildTenant(job.attrs.data);
@@ -187,6 +199,7 @@ async function runGenerationJobNow(job) {
   } catch (err) {
     await releaseFullReservation(job.attrs.data);
     await revertClaim(job.attrs.data);
+    await notifyGenerationFailed(job.attrs.data, err);
     job.attrs.failReason = err.message;
     job.attrs.lastFinishedAt = new Date();
     await job.save();
@@ -201,6 +214,7 @@ function defineGenerationJob(agenda) {
     } catch (err) {
       await releaseFullReservation(job.attrs.data);
       await revertClaim(job.attrs.data);
+      await notifyGenerationFailed(job.attrs.data, err);
       throw err;
     }
   });

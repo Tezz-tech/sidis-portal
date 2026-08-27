@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import PublicLayout from './routes/public/PublicLayout';
 import Landing from './routes/public/Landing';
@@ -10,6 +10,7 @@ import ForgotPassword from './routes/public/ForgotPassword';
 import ResetPassword from './routes/public/ResetPassword';
 import Terms from './routes/public/Terms';
 import Privacy from './routes/public/Privacy';
+import NotFound from './routes/public/NotFound';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminLayout from './routes/app/AdminLayout';
@@ -58,6 +59,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       <Route
@@ -110,8 +112,6 @@ export default function App() {
         <Route path=":token/submitted" element={<Submitted />} />
         <Route path=":token/result" element={<Result />} />
       </Route>
-
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

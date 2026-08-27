@@ -11,6 +11,7 @@ router.use(requireStaffAuth);
 
 router.get('/', teamController.list);
 router.post('/', requireRole('org_admin'), validate(inviteStaffSchema), teamController.invite);
+router.post('/:id/resend-invite', requireRole('org_admin'), teamController.resendInvite);
 router.patch('/:id/role', requireRole('org_admin'), validate(updateRoleSchema), teamController.updateRole);
 router.patch('/:id/status', requireRole('org_admin'), validate(updateStatusSchema), teamController.setStatus);
 

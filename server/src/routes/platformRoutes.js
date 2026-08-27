@@ -41,6 +41,7 @@ router.get('/pricing', platformController.getPricingConfig);
 router.put('/pricing', validate(pricingConfigSchema), platformController.updatePricingConfig);
 
 router.get('/payments', platformController.listPayments);
+router.post('/payments/:id/refund', platformController.refundPayment);
 router.get('/metrics', platformController.getMetrics);
 router.get('/audit-log', platformController.getAuditLog);
 

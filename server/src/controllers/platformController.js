@@ -5,6 +5,7 @@ const platformMetricsService = require('../services/platformMetricsService');
 const authService = require('../services/authService');
 const auditService = require('../services/auditService');
 const dataProtectionService = require('../services/dataProtectionService');
+const billingService = require('../services/billingService');
 
 async function listOrganizations(req, res, next) {
   try {
@@ -213,6 +214,15 @@ async function eraseOrganizationData(req, res, next) {
   }
 }
 
+async function refundPayment(req, res, next) {
+  try {
+    const payment = await billingService.refundPayment(req.params.id, req.tenant.userId);
+    res.json({ payment });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listOrganizations,
   getOrganization,
@@ -234,4 +244,5 @@ module.exports = {
   getAuditLog,
   exportOrganizationData,
   eraseOrganizationData,
+  refundPayment,
 };

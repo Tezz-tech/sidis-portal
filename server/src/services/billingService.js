@@ -4,6 +4,7 @@ const paystackService = require('./paystackService');
 const creditService = require('./creditService');
 const pricingService = require('./pricingService');
 const emailService = require('./emailService');
+const { writeAuditLog } = require('./auditService');
 const AppError = require('../utils/AppError');
 const { randomToken } = require('../utils/tokens');
 const logger = require('../config/logger');
@@ -118,4 +119,44 @@ async function getBalance(tenant) {
   return org.creditBalance;
 }
 
-module.exports = { initializePurchase, handleChargeSuccess, confirmPurchase, getBalance };
+/**
+ * Reverses a payment's credits on the internal ledger only — does not call
+ * Paystack to reverse the actual charge (no such integration exists yet).
+ * Blocked by creditService's own balance guard if the org has already spent
+ * below what would need to be clawed back, surfacing a clear 402 rather
+ * than allowing the balance to go negative.
+ */
+async function refundPayment(paymentId, actorId) {
+  const payment = await Payment.findById(paymentId);
+  if (!payment) throw new AppError('Payment not found', 404, 'NOT_FOUND');
+  if (payment.status !== 'success') {
+    throw new AppError('Only a successful payment can be refunded', 400, 'INVALID_STATE');
+  }
+  if (payment.refundedAt) {
+    throw new AppError('This payment has already been refunded', 400, 'ALREADY_REFUNDED');
+  }
+
+  await creditService.refund({
+    organizationId: payment.organization,
+    amount: -payment.creditsPurchased,
+    reference: { model: 'Payment', id: payment._id },
+    description: `Refunded ${payment.creditsPurchased} credits for payment ${payment.paystackReference}`,
+    createdBy: actorId,
+  });
+
+  payment.refundedAt = new Date();
+  await payment.save();
+
+  await writeAuditLog({
+    organization: payment.organization,
+    actor: actorId,
+    action: 'payment.refunded',
+    targetModel: 'Payment',
+    targetId: payment._id,
+    metadata: { creditsReclaimed: payment.creditsPurchased, paystackReference: payment.paystackReference },
+  });
+
+  return payment;
+}
+
+module.exports = { initializePurchase, handleChargeSuccess, confirmPurchase, getBalance, refundPayment };

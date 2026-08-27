@@ -23,6 +23,15 @@ async function invite(req, res, next) {
   }
 }
 
+async function resendInvite(req, res, next) {
+  try {
+    const user = await authService.resendStaffInvite(req.tenant, req.params.id, req.tenant.userId);
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function updateRole(req, res, next) {
   try {
     const user = await teamService.updateRole(req.tenant, req.params.id, req.body.role, req.tenant.userId);
@@ -41,4 +50,4 @@ async function setStatus(req, res, next) {
   }
 }
 
-module.exports = { list, invite, updateRole, setStatus };
+module.exports = { list, invite, resendInvite, updateRole, setStatus };

@@ -1,9 +1,10 @@
 const { User, Organization } = require('../models');
+const { scoped } = require('./scopedRepo');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { randomToken } = require('../utils/tokens');
 const AppError = require('../utils/AppError');
-const { sendInviteEmail, sendPasswordResetEmail } = require('./emailService');
+const { sendInviteEmail, sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedEmail } = require('./emailService');
 const { writeAuditLog } = require('./auditService');
 
 const INVITE_TTL_MS = 72 * 60 * 60 * 1000;
@@ -100,6 +101,32 @@ async function inviteStaff({ organizationId, email, firstName, lastName, role, i
   return toSafeUser(user);
 }
 
+async function resendStaffInvite(tenant, userId, actorId) {
+  const user = await scoped(User, tenant).findById(userId);
+  if (!user) throw new AppError('Team member not found', 404, 'NOT_FOUND');
+  if (user.status !== 'invited') {
+    throw new AppError('This person has already accepted their invite', 400, 'ALREADY_ACTIVE');
+  }
+
+  const org = await Organization.findById(tenant.organizationId);
+  const inviteToken = randomToken();
+  user.inviteToken = inviteToken;
+  user.inviteExpiresAt = new Date(Date.now() + INVITE_TTL_MS);
+  await user.save();
+
+  await sendInviteEmail({ to: user.email, firstName: user.firstName, organizationName: org.name, inviteToken });
+  await writeAuditLog({
+    organization: tenant.organizationId,
+    actor: actorId,
+    action: 'staff.invite_resent',
+    targetModel: 'User',
+    targetId: user._id,
+    metadata: { email: user.email },
+  });
+
+  return toSafeUser(user);
+}
+
 async function acceptInvite({ token, password }) {
   const user = await User.findOne({ inviteToken: token }).select('+inviteToken');
   if (!user || !user.inviteExpiresAt || user.inviteExpiresAt < new Date()) {
@@ -110,6 +137,9 @@ async function acceptInvite({ token, password }) {
   user.inviteToken = null;
   user.inviteExpiresAt = null;
   await user.save();
+
+  const org = user.organization ? await Organization.findById(user.organization) : null;
+  await sendWelcomeEmail({ to: user.email, firstName: user.firstName, organizationName: org?.name || 'Sidis' });
 
   return issueTokens(user);
 }
@@ -137,6 +167,8 @@ async function resetPassword({ token, password }) {
   user.passwordResetExpiresAt = null;
   user.refreshTokenVersion += 1;
   await user.save();
+
+  await sendPasswordChangedEmail({ to: user.email, firstName: user.firstName });
 }
 
 async function getCurrentUser(userId) {
@@ -164,6 +196,7 @@ module.exports = {
   refresh,
   logout,
   inviteStaff,
+  resendStaffInvite,
   acceptInvite,
   forgotPassword,
   resetPassword,

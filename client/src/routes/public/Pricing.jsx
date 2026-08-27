@@ -5,10 +5,13 @@ import api from '../../lib/api';
 import { SkeletonCard } from '../../components/ui/Skeleton';
 import MarketingButton from './marketing/MarketingButton';
 import GlassCard from './marketing/GlassCard';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const TIER_GRADIENTS = ['from-orange-400 to-pink-600', 'from-pink-400 to-purple-600', 'from-purple-400 to-orange-500'];
 
 export default function Pricing() {
+  useDocumentTitle('Pricing — Sidis');
+
   const { data, isLoading } = useQuery({
     queryKey: ['public-pricing'],
     queryFn: () => api.get('/api/public/pricing').then((r) => r.data.packs),

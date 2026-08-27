@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { apiErrorMessage } from '../../lib/api';
 import MarketingButton from './marketing/MarketingButton';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -17,6 +18,7 @@ const schema = z.object({
 const fieldClasses = 'w-full px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all duration-300 backdrop-blur-xl';
 
 export default function Login() {
+  useDocumentTitle('Sign in — Sidis');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

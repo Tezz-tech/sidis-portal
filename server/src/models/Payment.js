@@ -10,6 +10,9 @@ const paymentSchema = new Schema(
     status: { type: String, enum: ['pending', 'success', 'failed'], default: 'pending' },
     paidAt: { type: Date, default: null },
     rawWebhookPayload: { type: Schema.Types.Mixed, default: null },
+    // Credits-ledger reversal only (see billingService.refundPayment) — does
+    // not itself call Paystack to reverse the underlying charge.
+    refundedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

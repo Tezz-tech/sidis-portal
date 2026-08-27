@@ -41,6 +41,12 @@ export default function Team() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team'] }),
   });
 
+  const resendMutation = useMutation({
+    mutationFn: (id) => api.post(`/api/team/${id}/resend-invite`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['team'] }); toast.success('Invite resent'); },
+    onError: (err) => toast.error(apiErrorMessage(err)),
+  });
+
   return (
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
@@ -71,15 +77,27 @@ export default function Team() {
                 <Td className="capitalize">{member.role.replace('_', ' ')}</Td>
                 <Td><Badge variant={member.status === 'active' ? 'pass' : 'neutral'}>{member.status}</Badge></Td>
                 <Td className="text-right">
-                  {user?.role === 'org_admin' && member.id !== user.id && (
-                    <button
-                      type="button"
-                      className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
-                      onClick={() => statusMutation.mutate({ id: member.id, status: member.status === 'active' ? 'disabled' : 'active' })}
-                    >
-                      {member.status === 'active' ? 'Disable' : 'Enable'}
-                    </button>
-                  )}
+                  <div className="flex items-center justify-end gap-4">
+                    {user?.role === 'org_admin' && member.status === 'invited' && (
+                      <button
+                        type="button"
+                        className="text-sm text-orange-400 hover:text-orange-300 transition-colors duration-200"
+                        onClick={() => resendMutation.mutate(member.id)}
+                        disabled={resendMutation.isPending}
+                      >
+                        Resend invite
+                      </button>
+                    )}
+                    {user?.role === 'org_admin' && member.id !== user.id && member.status !== 'invited' && (
+                      <button
+                        type="button"
+                        className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
+                        onClick={() => statusMutation.mutate({ id: member.id, status: member.status === 'active' ? 'disabled' : 'active' })}
+                      >
+                        {member.status === 'active' ? 'Disable' : 'Enable'}
+                      </button>
+                    )}
+                  </div>
                 </Td>
               </Tr>
             ))}
