@@ -17,12 +17,23 @@ const RESET_TTL_MS = 60 * 60 * 1000;
  * rule (which governs post-auth application data access).
  */
 async function login({ email, password }) {
-  const user = await User.findOne({ email: email.toLowerCase() }).select('+passwordHash');
-  if (!user || !user.passwordHash || user.status !== 'active') {
-    throw new AppError('That email or password is incorrect', 401, 'INVALID_CREDENTIALS');
+  // Email is only unique per-organization (see the compound index on User),
+  // not globally — the same address can legitimately belong to an active
+  // account at one organization and an invited-but-never-activated one at
+  // another. A plain findOne() here isn't guaranteed to land on the right
+  // one, and would then reject a perfectly correct password because it
+  // happened to fetch the *other* account. Try every active candidate and
+  // let the password itself decide which one this login is for.
+  const candidates = await User.find({ email: email.toLowerCase(), status: 'active' }).select('+passwordHash');
+
+  let user = null;
+  for (const candidate of candidates) {
+    if (candidate.passwordHash && await comparePassword(password, candidate.passwordHash)) {
+      user = candidate;
+      break;
+    }
   }
-  const valid = await comparePassword(password, user.passwordHash);
-  if (!valid) {
+  if (!user) {
     throw new AppError('That email or password is incorrect', 401, 'INVALID_CREDENTIALS');
   }
 
