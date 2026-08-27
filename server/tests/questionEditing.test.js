@@ -33,9 +33,10 @@ async function createOrgWithAdmin(name, slugBase) {
 // reads it back into a header the way a browser + our axios interceptor
 // does — tests have to do that wiring themselves.
 function withCsrf(agent, loginRes) {
-  const setCookie = [].concat(loginRes.headers['set-cookie'] || []);
-  const match = setCookie.map((c) => c.match(/^csrfToken=([^;]+)/)).find(Boolean);
-  const token = match ? match[1] : null;
+  // Mirrors the real client (client/src/lib/api.js): the token is learned
+  // from the X-CSRF-Token response header, not read from the cookie — a
+  // browser could never read that cookie cross-origin in the first place.
+  const token = loginRes.headers['x-csrf-token'];
   if (!token) return agent;
   ['post', 'patch', 'put', 'delete'].forEach((method) => {
     const original = agent[method].bind(agent);

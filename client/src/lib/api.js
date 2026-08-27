@@ -5,23 +5,35 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Double-submit CSRF: the server sets a readable (non-httpOnly) csrfToken
-// cookie and only enforces it once an auth cookie is present — a
-// cross-site attacker page can't read our cookies to put the value in this
-// header (Same-Origin Policy), so this round-trip is what proves the
-// request actually came from our own frontend.
-function readCookie(name) {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
+// Double-submit CSRF: the API sets a csrfToken cookie and only enforces it
+// once an auth cookie is present. Client and API are different origins, so
+// document.cookie here can never read a cookie the API set — instead the
+// API echoes the current value back on the X-CSRF-Token response header of
+// every response (exposed cross-origin via CORS's exposedHeaders), and this
+// caches it in memory to replay on the next write. A forged cross-site
+// request can't read that header either, since CORS never allowed its
+// origin in the first place — that's what still makes this a real defense.
+let csrfToken = null;
 
 api.interceptors.request.use((config) => {
-  if (config.method && config.method.toUpperCase() !== 'GET') {
-    const token = readCookie('csrfToken');
-    if (token) config.headers['X-CSRF-Token'] = token;
+  if (config.method && config.method.toUpperCase() !== 'GET' && csrfToken) {
+    config.headers['X-CSRF-Token'] = csrfToken;
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => {
+    const token = response.headers['x-csrf-token'];
+    if (token) csrfToken = token;
+    return response;
+  },
+  (error) => {
+    const token = error.response?.headers?.['x-csrf-token'];
+    if (token) csrfToken = token;
+    throw error;
+  },
+);
 
 let isRefreshing = false;
 let pendingQueue = [];

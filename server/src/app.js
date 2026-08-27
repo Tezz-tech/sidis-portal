@@ -31,6 +31,13 @@ app.use(
       return callback(new Error(`Origin ${origin} is not allowed`));
     },
     credentials: true,
+    // The CSRF token travels back to the client as a response header (see
+    // middleware/csrf.js) rather than a cookie the client reads directly,
+    // since client and API are different origins and document.cookie can
+    // never see a cookie the other origin set. Custom response headers are
+    // invisible to cross-origin JS by default even when the request itself
+    // is allowed — this is what makes the header actually readable.
+    exposedHeaders: ['X-CSRF-Token'],
   }),
 );
 app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/health' } }));
