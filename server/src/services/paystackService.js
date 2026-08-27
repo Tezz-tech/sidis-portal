@@ -41,7 +41,14 @@ async function verifyTransaction(reference) {
 
 function verifyWebhookSignature(rawBody, signature) {
   const hash = crypto.createHmac('sha512', env.PAYSTACK_SECRET_KEY).update(rawBody).digest('hex');
-  return hash === signature;
+  const hashBuffer = Buffer.from(hash, 'hex');
+  const signatureBuffer = Buffer.from(typeof signature === 'string' ? signature : '', 'hex');
+  // timingSafeEqual throws on mismatched lengths rather than returning
+  // false, so an invalid/absent signature has to be caught before it —
+  // that length check alone leaks nothing an attacker doesn't already know
+  // (the hash length is fixed and public).
+  if (hashBuffer.length !== signatureBuffer.length) return false;
+  return crypto.timingSafeEqual(hashBuffer, signatureBuffer);
 }
 
 module.exports = { initializeTransaction, verifyTransaction, verifyWebhookSignature };
