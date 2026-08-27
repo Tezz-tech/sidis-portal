@@ -4,24 +4,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card, { CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input, { Label, FieldHint } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import Card, { CardTitle } from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import Input, { Label, FieldHint } from '../../components/console/Input';
+import Select from '../../components/console/Select';
 import { pageEnter } from '../../lib/motion';
 
 function Toggle({ checked, onChange, label }) {
   return (
     <label className="flex items-center justify-between py-2 cursor-pointer">
-      <span className="text-body text-ink">{label}</span>
+      <span className="text-gray-200">{label}</span>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`w-10 h-6 rounded-full transition-colors duration-micro relative ${checked ? 'bg-ink' : 'bg-rule'}`}
+        className={`w-10 h-6 rounded-full transition-colors duration-200 relative ${checked ? 'bg-gradient-to-r from-orange-500 to-pink-600' : 'bg-white/15'}`}
       >
-        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-paper transition-transform duration-micro ${checked ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 ${checked ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
       </button>
     </label>
   );
@@ -70,9 +70,9 @@ export default function ExamSettings() {
 
   return (
     <motion.div {...pageEnter} className="max-w-2xl">
-      <p className="text-body text-graphite mb-8">Configure timing, behaviour, and how results are shared.</p>
+      <p className="text-gray-400 mb-8">Configure timing, behaviour, and how results are shared.</p>
 
-      <Card className="space-y-6 mb-6">
+      <Card className="space-y-6 mb-6" animate={false}>
         <CardTitle>Timing</CardTitle>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -101,9 +101,9 @@ export default function ExamSettings() {
         </div>
       </Card>
 
-      <Card className="mb-6">
+      <Card className="mb-6" animate={false}>
         <CardTitle>Behaviour</CardTitle>
-        <div className="divide-y divide-rule">
+        <div className="divide-y divide-white/10">
           <Toggle label="Shuffle question order per attempt" checked={config.shuffleQuestions} onChange={(v) => setConfig((c) => ({ ...c, shuffleQuestions: v }))} />
           <Toggle label="Shuffle option order per attempt" checked={config.shuffleOptions} onChange={(v) => setConfig((c) => ({ ...c, shuffleOptions: v }))} />
           <Toggle label="Allow retakes" checked={config.allowRetakes} onChange={(v) => setConfig((c) => ({ ...c, allowRetakes: v }))} />
@@ -116,19 +116,19 @@ export default function ExamSettings() {
         )}
       </Card>
 
-      <Card className="mb-6 space-y-4">
+      <Card className="mb-6 space-y-4" animate={false}>
         <CardTitle>Results</CardTitle>
         {isLocked && (
-          <p className="text-small text-graphite">
+          <p className="text-sm text-gray-400">
             This exam is already live — everything else is locked, but you can still change when results are shown.
           </p>
         )}
         <div>
           <Label htmlFor="resultVisibility">When can participants see results?</Label>
           <Select id="resultVisibility" value={config.resultVisibility} onChange={(e) => setConfig((c) => ({ ...c, resultVisibility: e.target.value }))}>
-            <option value="immediate">Immediately after submitting</option>
-            <option value="after_close">After the exam closes</option>
-            <option value="never">Never shown to participants</option>
+            <option value="immediate" className="bg-gray-900">Immediately after submitting</option>
+            <option value="after_close" className="bg-gray-900">After the exam closes</option>
+            <option value="never" className="bg-gray-900">Never shown to participants</option>
           </Select>
         </div>
         <Toggle label="Show correct answers in results" checked={config.showCorrectAnswers} onChange={(v) => setConfig((c) => ({ ...c, showCorrectAnswers: v }))} />

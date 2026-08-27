@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
-import Badge from '../../components/ui/Badge';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
-import { SkeletonRows } from '../../components/ui/Skeleton';
+import Badge from '../../components/console/Badge';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
+import { SkeletonRows } from '../../components/console/Skeleton';
 import { pageEnter } from '../../lib/motion';
 
 const STATUS_VARIANT = { pending: 'neutral', success: 'pass', failed: 'fail' };
@@ -16,7 +16,7 @@ export default function Payments() {
 
   return (
     <motion.div {...pageEnter}>
-      <h1 className="font-display text-page-title text-ink mb-8">Payments</h1>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-8">Payments</h1>
 
       {isLoading && <SkeletonRows rows={4} />}
 
@@ -35,12 +35,12 @@ export default function Payments() {
           <tbody>
             {payments.map((p) => (
               <Tr key={p._id}>
-                <Td>{p.organization?.name}</Td>
-                <Td mono className="text-graphite">{p.paystackReference}</Td>
+                <Td className="text-white">{p.organization?.name}</Td>
+                <Td mono>{p.paystackReference}</Td>
                 <Td><Badge variant={STATUS_VARIANT[p.status]}>{p.status}</Badge></Td>
                 <Td numeric mono>{p.creditsPurchased}</Td>
                 <Td numeric mono>{(p.amountKobo / 100).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}</Td>
-                <Td mono className="text-graphite">{new Date(p.createdAt).toLocaleDateString()}</Td>
+                <Td mono>{new Date(p.createdAt).toLocaleDateString()}</Td>
               </Tr>
             ))}
           </tbody>

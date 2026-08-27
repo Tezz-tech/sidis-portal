@@ -5,10 +5,10 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Pencil, Trash2, RefreshCw, ChevronUp, ChevronDown, Plus, Check, Quote } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import Modal from '../../components/ui/Modal';
-import { SkeletonRows } from '../../components/ui/Skeleton';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import Modal from '../../components/console/Modal';
+import { SkeletonRows } from '../../components/console/Skeleton';
 import QuestionEditorModal from './QuestionEditorModal';
 import { pageEnter } from '../../lib/motion';
 
@@ -89,16 +89,16 @@ export default function QuestionReview() {
   return (
     <motion.div {...pageEnter}>
       <div className="flex items-start justify-between mb-8">
-        <p className="text-body text-graphite">
+        <p className="text-gray-400">
           {questions?.length ?? 0} questions · {exam?.totalPoints ?? 0} points
         </p>
         <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={() => setEditing('new')}>
-            <Plus size={16} strokeWidth={1.5} /> Add question
+            <Plus size={16} strokeWidth={1.75} /> Add question
           </Button>
           {isPastReview ? (
             <Badge variant="pass">
-              <Check size={14} strokeWidth={1.5} /> {exam.status === 'published' ? 'Published' : exam.status === 'closed' ? 'Closed' : 'Confirmed'}
+              <Check size={14} strokeWidth={1.75} /> {exam.status === 'published' ? 'Published' : exam.status === 'closed' ? 'Closed' : 'Confirmed'}
             </Badge>
           ) : (
             <Button
@@ -106,7 +106,7 @@ export default function QuestionReview() {
               onClick={() => confirmMutation.mutate()}
               disabled={confirmMutation.isPending || !questions?.length}
             >
-              <Check size={16} strokeWidth={1.5} />
+              <Check size={16} strokeWidth={1.75} />
               {exam?.reviewConfirmedAt ? 'Confirmed' : 'Confirm question set'}
             </Button>
           )}
@@ -117,45 +117,45 @@ export default function QuestionReview() {
 
       <div className="space-y-4">
         {questions?.map((q, i) => (
-          <div key={q._id} className="bg-paper border border-rule rounded-card p-5">
+          <div key={q._id} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-small text-pencil tabular-nums w-6">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-sm text-gray-500 tabular-nums w-6">{String(i + 1).padStart(2, '0')}</span>
                 <Badge variant="neutral">{TYPE_LABEL[q.type]}</Badge>
                 <Badge variant={q.source === 'manual' ? 'neutral' : 'marker'}>{SOURCE_LABEL[q.source]}</Badge>
-                <span className="text-small text-pencil font-mono">{q.points} pt{q.points === 1 ? '' : 's'}</span>
+                <span className="text-sm text-gray-500 font-mono">{q.points} pt{q.points === 1 ? '' : 's'}</span>
               </div>
               <div className="flex items-center gap-1">
-                <IconButton label="Move up" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={16} strokeWidth={1.5} /></IconButton>
-                <IconButton label="Move down" onClick={() => move(i, 1)} disabled={i === questions.length - 1}><ChevronDown size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton label="Move up" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={16} strokeWidth={1.75} /></IconButton>
+                <IconButton label="Move down" onClick={() => move(i, 1)} disabled={i === questions.length - 1}><ChevronDown size={16} strokeWidth={1.75} /></IconButton>
                 {q.source !== 'manual' && (
                   <IconButton label="Regenerate" onClick={() => regenerateMutation.mutate(q._id)} disabled={regeneratingId === q._id}>
-                    <RefreshCw size={16} strokeWidth={1.5} className={regeneratingId === q._id ? 'animate-spin' : ''} />
+                    <RefreshCw size={16} strokeWidth={1.75} className={regeneratingId === q._id ? 'animate-spin' : ''} />
                   </IconButton>
                 )}
-                <IconButton label="Edit" onClick={() => setEditing(q)}><Pencil size={16} strokeWidth={1.5} /></IconButton>
+                <IconButton label="Edit" onClick={() => setEditing(q)}><Pencil size={16} strokeWidth={1.75} /></IconButton>
                 <IconButton
                   label="Delete"
                   onClick={() => (isPastReview ? setDeleteConfirm(q) : deleteMutation.mutate(q._id))}
                   danger
                 >
-                  <Trash2 size={16} strokeWidth={1.5} />
+                  <Trash2 size={16} strokeWidth={1.75} />
                 </IconButton>
               </div>
             </div>
 
-            <p className="text-body text-ink mb-3">{q.prompt}</p>
+            <p className="text-white mb-3">{q.prompt}</p>
 
             {(q.type === 'mcq' || q.type === 'true_false') && (
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {q.options.map((opt) => (
                   <div
                     key={opt.key}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-chip border text-small ${
-                      opt.key === q.correctOptionKey ? 'border-pass/40 bg-pass/5 text-ink' : 'border-rule text-graphite'
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${
+                      opt.key === q.correctOptionKey ? 'border-green-400/40 bg-green-400/10 text-white' : 'border-white/10 text-gray-400'
                     }`}
                   >
-                    <span className="font-mono text-pencil">{opt.key}</span>
+                    <span className="font-mono text-gray-500">{opt.key}</span>
                     {opt.text}
                   </div>
                 ))}
@@ -163,14 +163,14 @@ export default function QuestionReview() {
             )}
 
             {q.type === 'short_answer' && (
-              <div className="mb-3 px-3 py-2 rounded-chip border border-pass/40 bg-pass/5 text-small text-ink">
+              <div className="mb-3 px-3 py-2 rounded-xl border border-green-400/40 bg-green-400/10 text-sm text-white">
                 Expected: {q.expectedAnswer}
               </div>
             )}
 
             {q.sourceExcerpt && (
-              <div className="flex gap-2 pl-3 border-l-2 border-rule text-small text-graphite italic">
-                <Quote size={14} strokeWidth={1.5} className="text-pencil shrink-0 mt-0.5" />
+              <div className="flex gap-2 pl-3 border-l-2 border-white/15 text-sm text-gray-400 italic">
+                <Quote size={14} strokeWidth={1.75} className="text-gray-500 shrink-0 mt-0.5" />
                 {q.sourceExcerpt}
               </div>
             )}
@@ -199,7 +199,7 @@ export default function QuestionReview() {
           </>
         }
       >
-        <p className="text-body text-graphite">
+        <p className="text-gray-400">
           This exam is {exam?.status} — participants may already have attempted it. Deleting this question removes it
           from the question set for anyone attempting the exam from now on, and it will no longer appear in past
           participants&rsquo; result breakdowns.
@@ -214,8 +214,8 @@ function IconButton({ children, label, danger, ...props }) {
     <button
       type="button"
       aria-label={label}
-      className={`p-2 rounded-chip transition-colors duration-micro disabled:opacity-30 disabled:cursor-not-allowed ${
-        danger ? 'text-graphite hover:text-fail hover:bg-fail/5' : 'text-graphite hover:text-ink hover:bg-sheet'
+      className={`p-2 rounded-lg transition-colors duration-200 disabled:opacity-30 disabled:cursor-not-allowed ${
+        danger ? 'text-gray-400 hover:text-red-400 hover:bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'
       }`}
       {...props}
     >

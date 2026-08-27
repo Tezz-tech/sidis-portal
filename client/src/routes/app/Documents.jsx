@@ -5,16 +5,16 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Upload, FileText, Trash2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import EmptyState from '../../components/ui/EmptyState';
-import { SkeletonRows } from '../../components/ui/Skeleton';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Button from '../../components/console/Button';
+import EmptyState from '../../components/console/EmptyState';
+import { SkeletonRows } from '../../components/console/Skeleton';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 const STATUS_META = {
-  done: { icon: CheckCircle2, label: 'Ready', className: 'text-pass' },
-  pending: { icon: Clock, label: 'Reading...', className: 'text-graphite' },
-  failed: { icon: XCircle, label: 'Failed', className: 'text-fail' },
+  done: { icon: CheckCircle2, label: 'Ready', className: 'text-green-400' },
+  pending: { icon: Clock, label: 'Reading...', className: 'text-gray-400' },
+  failed: { icon: XCircle, label: 'Failed', className: 'text-red-400' },
 };
 
 export default function Documents() {
@@ -55,12 +55,12 @@ export default function Documents() {
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display text-page-title text-ink">Documents</h1>
-          <p className="text-body text-graphite mt-1">Upload the source material you want to build a test from.</p>
+          <h1 className="text-3xl md:text-4xl font-black text-white">Documents</h1>
+          <p className="text-gray-400 mt-1">Upload the source material you want to build a test from.</p>
         </div>
         <input ref={fileInputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileChange} />
         <Button variant="marker" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-          <Upload size={16} strokeWidth={1.5} /> {uploading ? 'Uploading...' : 'Upload document'}
+          <Upload size={16} strokeWidth={1.75} /> {uploading ? 'Uploading...' : 'Upload document'}
         </Button>
       </div>
 
@@ -73,7 +73,7 @@ export default function Documents() {
           description="Upload a PDF or Word file to generate your first test from it."
           action={
             <Button variant="marker" onClick={() => fileInputRef.current?.click()}>
-              <Upload size={16} strokeWidth={1.5} /> Upload document
+              <Upload size={16} strokeWidth={1.75} /> Upload document
             </Button>
           }
         />
@@ -95,14 +95,14 @@ export default function Documents() {
               return (
                 <Tr key={doc._id}>
                   <Td>
-                    <div className="flex items-center gap-2">
-                      <FileText size={16} strokeWidth={1.5} className="text-graphite shrink-0" />
+                    <div className="flex items-center gap-2 text-white">
+                      <FileText size={16} strokeWidth={1.75} className="text-gray-500 shrink-0" />
                       {doc.originalName}
                     </div>
                   </Td>
                   <Td>
-                    <span className={`inline-flex items-center gap-1.5 text-small ${meta.className}`}>
-                      <meta.icon size={14} strokeWidth={1.5} /> {meta.label}
+                    <span className={`inline-flex items-center gap-1.5 text-sm ${meta.className}`}>
+                      <meta.icon size={14} strokeWidth={1.75} /> {meta.label}
                     </span>
                   </Td>
                   <Td numeric mono>{doc.charCount ? doc.charCount.toLocaleString() : '—'}</Td>
@@ -121,9 +121,9 @@ export default function Documents() {
                         type="button"
                         aria-label="Delete document"
                         onClick={() => deleteMutation.mutate(doc._id)}
-                        className="p-2 rounded-chip text-graphite hover:text-fail hover:bg-fail/5 transition-colors duration-micro"
+                        className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
                       >
-                        <Trash2 size={16} strokeWidth={1.5} />
+                        <Trash2 size={16} strokeWidth={1.75} />
                       </button>
                     </div>
                   </Td>

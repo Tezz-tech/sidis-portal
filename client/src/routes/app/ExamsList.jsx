@@ -5,14 +5,14 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Plus, ClipboardList } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import EmptyState from '../../components/ui/EmptyState';
-import { SkeletonRows } from '../../components/ui/Skeleton';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
-import Modal from '../../components/ui/Modal';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import EmptyState from '../../components/console/EmptyState';
+import { SkeletonRows } from '../../components/console/Skeleton';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
+import Modal from '../../components/console/Modal';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Select from '../../components/console/Select';
 import { pageEnter } from '../../lib/motion';
 
 const STATUS_VARIANT = { draft: 'neutral', generating: 'marker', review: 'marker', published: 'ink', closed: 'neutral' };
@@ -62,11 +62,11 @@ export default function ExamsList() {
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display text-page-title text-ink">Exams</h1>
-          <p className="text-body text-graphite mt-1">Every test you have built, in progress or live.</p>
+          <h1 className="text-3xl md:text-4xl font-black text-white">Exams</h1>
+          <p className="text-gray-400 mt-1">Every test you have built, in progress or live.</p>
         </div>
         <Button variant="marker" onClick={() => setModalOpen(true)}>
-          <Plus size={16} strokeWidth={1.5} /> New exam
+          <Plus size={16} strokeWidth={1.75} /> New exam
         </Button>
       </div>
 
@@ -77,7 +77,7 @@ export default function ExamsList() {
           icon={ClipboardList}
           title="No exams yet"
           description="Upload a document to create your first one."
-          action={<Button variant="marker" onClick={() => setModalOpen(true)}><Plus size={16} strokeWidth={1.5} /> New exam</Button>}
+          action={<Button variant="marker" onClick={() => setModalOpen(true)}><Plus size={16} strokeWidth={1.75} /> New exam</Button>}
         />
       )}
 
@@ -95,12 +95,12 @@ export default function ExamsList() {
             {exams.map((exam) => (
               <Tr key={exam._id}>
                 <Td>
-                  <Link to={examLink(exam)} className="text-ink hover:underline">{exam.title}</Link>
+                  <Link to={examLink(exam)} className="text-white hover:text-orange-400 transition-colors duration-200">{exam.title}</Link>
                 </Td>
                 <Td><Badge variant={STATUS_VARIANT[exam.status]}>{STATUS_LABEL[exam.status]}</Badge></Td>
                 <Td numeric mono>{exam.questionCount}</Td>
                 <Td className="text-right">
-                  <Link to={examLink(exam)} className="text-small text-marker-deep hover:underline">Open</Link>
+                  <Link to={examLink(exam)} className="text-sm text-orange-400 hover:text-orange-300 transition-colors duration-200">Open</Link>
                 </Td>
               </Tr>
             ))}
@@ -130,9 +130,9 @@ export default function ExamsList() {
           <div>
             <Label htmlFor="exam-document">Source document</Label>
             <Select id="exam-document" value={documentId} onChange={(e) => setDocumentId(e.target.value)}>
-              <option value="">No document — add questions manually</option>
+              <option value="" className="bg-gray-900">No document — add questions manually</option>
               {readyDocuments.map((doc) => (
-                <option key={doc._id} value={doc._id}>{doc.originalName}</option>
+                <option key={doc._id} value={doc._id} className="bg-gray-900">{doc.originalName}</option>
               ))}
             </Select>
           </div>

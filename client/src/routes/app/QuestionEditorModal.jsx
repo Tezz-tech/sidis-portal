@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Modal from '../../components/ui/Modal';
-import Button from '../../components/ui/Button';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
-import Select from '../../components/ui/Select';
+import Modal from '../../components/console/Modal';
+import Button from '../../components/console/Button';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Textarea from '../../components/console/Textarea';
+import Select from '../../components/console/Select';
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -84,9 +84,9 @@ export default function QuestionEditorModal({ open, onClose, onSave, initial, sa
         <div>
           <Label htmlFor="q-type">Type</Label>
           <Select id="q-type" value={form.type} onChange={(e) => setType(e.target.value)}>
-            <option value="mcq">Multiple choice</option>
-            <option value="true_false">True / false</option>
-            <option value="short_answer">Short answer</option>
+            <option value="mcq" className="bg-gray-900">Multiple choice</option>
+            <option value="true_false" className="bg-gray-900">True / false</option>
+            <option value="short_answer" className="bg-gray-900">Short answer</option>
           </Select>
         </div>
 
@@ -105,21 +105,21 @@ export default function QuestionEditorModal({ open, onClose, onSave, initial, sa
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, correctOptionKey: opt.key }))}
                     aria-label={`Mark ${opt.key} correct`}
-                    className={`w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center text-small font-mono transition-colors duration-micro ${
-                      form.correctOptionKey === opt.key ? 'bg-pass border-pass text-paper' : 'border-rule text-graphite'
+                    className={`w-8 h-8 shrink-0 rounded-full border-2 flex items-center justify-center text-sm font-mono transition-colors duration-200 ${
+                      form.correctOptionKey === opt.key ? 'bg-green-500 border-green-500 text-white' : 'border-white/20 text-gray-400'
                     }`}
                   >
                     {opt.key}
                   </button>
                   <Input value={opt.text} onChange={(e) => updateOption(opt.key, e.target.value)} disabled={form.type === 'true_false'} />
                   {form.type === 'mcq' && form.options.length > 2 && (
-                    <button type="button" onClick={() => removeOption(opt.key)} className="text-pencil hover:text-fail text-small px-2">Remove</button>
+                    <button type="button" onClick={() => removeOption(opt.key)} className="text-gray-500 hover:text-red-400 text-sm px-2">Remove</button>
                   )}
                 </div>
               ))}
             </div>
             {form.type === 'mcq' && form.options.length < 6 && (
-              <button type="button" onClick={addOption} className="text-small text-marker-deep hover:underline mt-2">Add option</button>
+              <button type="button" onClick={addOption} className="text-sm text-orange-400 hover:text-orange-300 mt-2 transition-colors duration-200">Add option</button>
             )}
           </div>
         )}

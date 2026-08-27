@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import Card from '../../components/console/Card';
+import Button from '../../components/console/Button';
 import { pageEnter } from '../../lib/motion';
 
 export default function BillingCallback() {
@@ -34,31 +34,31 @@ export default function BillingCallback() {
 
   return (
     <motion.div {...pageEnter} className="max-w-md mx-auto py-16 text-center">
-      <Card>
+      <Card animate={false}>
         {state === 'checking' && (
           <>
-            <p className="text-body text-graphite">Confirming your payment...</p>
+            <p className="text-gray-400">Confirming your payment...</p>
           </>
         )}
         {state === 'success' && (
           <>
-            <CheckCircle2 size={32} strokeWidth={1.5} className="text-pass mx-auto mb-4" />
-            <p className="text-card-title text-ink mb-1">Payment confirmed</p>
-            <p className="text-body text-graphite mb-1">
+            <CheckCircle2 size={32} strokeWidth={1.75} className="text-green-400 mx-auto mb-4" />
+            <p className="text-lg font-bold text-white mb-1">Payment confirmed</p>
+            <p className="text-gray-400 mb-1">
               {result.creditsPurchased} credits added.
             </p>
-            <p className="text-small text-pencil font-mono mb-6">
+            <p className="text-sm text-gray-500 font-mono mb-6">
               New balance: {result.creditBalance.toLocaleString()} credits
             </p>
-            <Button as={Link} to="/app/billing" variant="marker">Back to billing</Button>
+            <Button to="/app/billing" variant="marker">Back to billing</Button>
           </>
         )}
         {state === 'error' && (
           <>
-            <XCircle size={32} strokeWidth={1.5} className="text-fail mx-auto mb-4" />
-            <p className="text-card-title text-ink mb-1">We couldn't confirm this payment</p>
-            <p className="text-body text-graphite mb-6">{error}</p>
-            <Button as={Link} to="/app/billing" variant="secondary">Back to billing</Button>
+            <XCircle size={32} strokeWidth={1.75} className="text-red-400 mx-auto mb-4" />
+            <p className="text-lg font-bold text-white mb-1">We couldn't confirm this payment</p>
+            <p className="text-gray-400 mb-6">{error}</p>
+            <Button to="/app/billing" variant="secondary">Back to billing</Button>
           </>
         )}
       </Card>

@@ -3,10 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card, { CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input, { Label } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import Card, { CardTitle } from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import Input, { Label } from '../../components/console/Input';
+import Select from '../../components/console/Select';
 import { pageEnter } from '../../lib/motion';
 
 export default function OrgSettings() {
@@ -32,9 +32,9 @@ export default function OrgSettings() {
 
   return (
     <motion.div {...pageEnter} className="max-w-xl">
-      <h1 className="font-display text-page-title text-ink mb-8">Organization settings</h1>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-8">Organization settings</h1>
 
-      <Card className="space-y-5 mb-6">
+      <Card className="space-y-5 mb-6" animate={false}>
         <CardTitle>General</CardTitle>
         <div>
           <Label htmlFor="org-name">Organization name</Label>
@@ -42,7 +42,7 @@ export default function OrgSettings() {
         </div>
       </Card>
 
-      <Card className="space-y-5 mb-6">
+      <Card className="space-y-5 mb-6" animate={false}>
         <CardTitle>Defaults for new exams</CardTitle>
         <div>
           <Label htmlFor="default-duration">Default duration (minutes)</Label>
@@ -61,9 +61,9 @@ export default function OrgSettings() {
             value={form.settings.resultVisibility}
             onChange={(e) => setForm((f) => ({ ...f, settings: { ...f.settings, resultVisibility: e.target.value } }))}
           >
-            <option value="immediate">Immediately after submitting</option>
-            <option value="after_close">After the exam closes</option>
-            <option value="never">Never shown to participants</option>
+            <option value="immediate" className="bg-gray-900">Immediately after submitting</option>
+            <option value="after_close" className="bg-gray-900">After the exam closes</option>
+            <option value="never" className="bg-gray-900">Never shown to participants</option>
           </Select>
         </div>
       </Card>

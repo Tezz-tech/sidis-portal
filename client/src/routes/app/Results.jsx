@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Download, AlertTriangle } from 'lucide-react';
 import api from '../../lib/api';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
-import EmptyState from '../../components/ui/EmptyState';
-import { SkeletonRows } from '../../components/ui/Skeleton';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Badge from '../../components/console/Badge';
+import Button from '../../components/console/Button';
+import EmptyState from '../../components/console/EmptyState';
+import { SkeletonRows } from '../../components/console/Skeleton';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 export default function Results() {
@@ -26,7 +26,7 @@ export default function Results() {
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-end mb-8">
         <Button variant="secondary" onClick={handleExport}>
-          <Download size={16} strokeWidth={1.5} /> Export CSV
+          <Download size={16} strokeWidth={1.75} /> Export CSV
         </Button>
       </div>
 
@@ -52,16 +52,16 @@ export default function Results() {
             {results.map((r) => (
               <Tr key={r.attemptId}>
                 <Td>
-                  <p className="text-ink">{r.participant.firstName} {r.participant.lastName}</p>
-                  <p className="text-small text-pencil font-mono">{r.participant.email}</p>
+                  <p className="text-white">{r.participant.firstName} {r.participant.lastName}</p>
+                  <p className="text-sm text-gray-500 font-mono">{r.participant.email}</p>
                 </Td>
                 <Td>
                   <Badge variant={r.status === 'graded' ? 'neutral' : 'marker'}>
                     {r.status === 'graded' ? 'Graded' : 'Grading'}
                   </Badge>
                   {r.hasLowConfidenceFlags && (
-                    <span className="inline-flex items-center gap-1 text-small text-marker-deep ml-2">
-                      <AlertTriangle size={12} strokeWidth={1.5} /> Review
+                    <span className="inline-flex items-center gap-1 text-sm text-orange-400 ml-2">
+                      <AlertTriangle size={12} strokeWidth={1.75} /> Review
                     </span>
                   )}
                 </Td>
@@ -73,7 +73,7 @@ export default function Results() {
                   )}
                 </Td>
                 <Td className="text-right">
-                  <Link to={`/app/exams/${examId}/results/${r.attemptId}`} className="text-small text-marker-deep hover:underline">
+                  <Link to={`/app/exams/${examId}/results/${r.attemptId}`} className="text-sm text-orange-400 hover:text-orange-300 transition-colors duration-200">
                     View
                   </Link>
                 </Td>

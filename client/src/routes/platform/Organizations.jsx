@@ -5,13 +5,13 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
-import Modal from '../../components/ui/Modal';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
-import { SkeletonRows } from '../../components/ui/Skeleton';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Select from '../../components/console/Select';
+import Modal from '../../components/console/Modal';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
+import { SkeletonRows } from '../../components/console/Skeleton';
 import { pageEnter } from '../../lib/motion';
 
 export default function Organizations() {
@@ -38,9 +38,9 @@ export default function Organizations() {
   return (
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-page-title text-ink">Organizations</h1>
+        <h1 className="text-3xl md:text-4xl font-black text-white">Organizations</h1>
         <Button variant="marker" onClick={() => setOpen(true)}>
-          <Plus size={16} strokeWidth={1.5} /> New workspace
+          <Plus size={16} strokeWidth={1.75} /> New workspace
         </Button>
       </div>
 
@@ -61,8 +61,8 @@ export default function Organizations() {
           <tbody>
             {organizations.map((org) => (
               <Tr key={org._id}>
-                <Td><Link to={`/admin/organizations/${org._id}`} className="text-ink hover:underline">{org.name}</Link></Td>
-                <Td className="capitalize text-graphite">{org.type}</Td>
+                <Td><Link to={`/admin/organizations/${org._id}`} className="text-white hover:text-orange-400 transition-colors duration-200">{org.name}</Link></Td>
+                <Td className="capitalize">{org.type}</Td>
                 <Td><Badge variant={org.status === 'active' ? 'pass' : 'fail'}>{org.status}</Badge></Td>
                 <Td numeric mono>{org.creditBalance.toLocaleString()}</Td>
                 <Td numeric mono>{org.examCount}</Td>
@@ -98,9 +98,9 @@ export default function Organizations() {
           <div>
             <Label htmlFor="o-type">Type</Label>
             <Select id="o-type" value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}>
-              <option value="company">Company</option>
-              <option value="school">School</option>
-              <option value="other">Other</option>
+              <option value="company" className="bg-gray-900">Company</option>
+              <option value="school" className="bg-gray-900">School</option>
+              <option value="other" className="bg-gray-900">Other</option>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">

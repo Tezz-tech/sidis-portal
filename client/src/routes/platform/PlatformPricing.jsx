@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card, { CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input, { Label } from '../../components/ui/Input';
+import Card, { CardTitle } from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import Input, { Label } from '../../components/console/Input';
 import { pageEnter } from '../../lib/motion';
 
 export default function PlatformPricing() {
@@ -39,9 +39,9 @@ export default function PlatformPricing() {
 
   return (
     <motion.div {...pageEnter} className="max-w-2xl">
-      <h1 className="font-display text-page-title text-ink mb-8">Pricing</h1>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-8">Pricing</h1>
 
-      <Card className="space-y-4 mb-6">
+      <Card className="space-y-4 mb-6" animate={false}>
         <CardTitle>Rates</CardTitle>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -55,10 +55,10 @@ export default function PlatformPricing() {
         </div>
       </Card>
 
-      <Card className="space-y-4 mb-6">
+      <Card className="space-y-4 mb-6" animate={false}>
         <div className="flex items-center justify-between">
           <CardTitle>Credit packs</CardTitle>
-          <Button variant="secondary" size="sm" onClick={addPack}><Plus size={14} strokeWidth={1.5} /> Add pack</Button>
+          <Button variant="secondary" size="sm" onClick={addPack}><Plus size={14} strokeWidth={1.75} /> Add pack</Button>
         </div>
         <div className="space-y-4">
           {form.packs.map((pack, i) => (
@@ -75,8 +75,8 @@ export default function PlatformPricing() {
                 <Label htmlFor={`pack-price-${i}`}>Price (kobo)</Label>
                 <Input id={`pack-price-${i}`} type="number" mono value={pack.priceKobo} onChange={(e) => updatePack(i, { priceKobo: Number(e.target.value) })} />
               </div>
-              <button type="button" onClick={() => removePack(i)} className="p-2 rounded-chip text-graphite hover:text-fail hover:bg-fail/5 mb-0.5">
-                <Trash2 size={16} strokeWidth={1.5} />
+              <button type="button" onClick={() => removePack(i)} className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 mb-0.5 transition-colors duration-200">
+                <Trash2 size={16} strokeWidth={1.75} />
               </button>
             </div>
           ))}

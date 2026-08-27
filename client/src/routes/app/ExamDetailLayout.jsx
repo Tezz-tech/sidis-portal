@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
 import api from '../../lib/api';
-import Badge from '../../components/ui/Badge';
+import Badge from '../../components/console/Badge';
 
 const STATUS_VARIANT = { draft: 'neutral', generating: 'marker', review: 'marker', published: 'ink', closed: 'neutral' };
 const STATUS_LABEL = { draft: 'Draft', generating: 'Generating', review: 'In review', published: 'Published', closed: 'Closed' };
@@ -38,25 +38,27 @@ export default function ExamDetailLayout() {
       <button
         type="button"
         onClick={() => navigate('/app/exams')}
-        className="inline-flex items-center gap-1.5 text-small text-graphite hover:text-ink transition-colors duration-micro mb-4"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors duration-200 mb-4"
       >
-        <ArrowLeft size={14} strokeWidth={1.5} /> All exams
+        <ArrowLeft size={14} strokeWidth={1.75} /> All exams
       </button>
 
       <div className="flex items-center gap-3 mb-6">
-        <h1 className="font-display text-page-title text-ink truncate">{exam?.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-black text-white truncate">{exam?.title}</h1>
         {exam && <Badge variant={STATUS_VARIANT[exam.status] || 'neutral'}>{STATUS_LABEL[exam.status] || exam.status}</Badge>}
       </div>
 
-      <nav className="flex gap-1 border-b border-rule mb-8 overflow-x-auto">
+      <nav className="flex gap-1 border-b border-white/10 mb-8 overflow-x-auto">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
             to={`/app/exams/${examId}/${tab.to}`}
             className={({ isActive }) =>
               clsx(
-                'px-4 py-2.5 text-body whitespace-nowrap border-b-2 -mb-px transition-colors duration-micro',
-                isActive ? 'border-ink text-ink' : 'border-transparent text-graphite hover:text-ink',
+                'px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors duration-200',
+                isActive
+                  ? 'border-orange-500 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600'
+                  : 'border-transparent text-gray-400 hover:text-white',
               )
             }
           >

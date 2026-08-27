@@ -2,10 +2,10 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { SkeletonRows } from '../../components/ui/Skeleton';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Card from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import { SkeletonRows } from '../../components/console/Skeleton';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 const TYPE_LABEL = {
@@ -42,23 +42,23 @@ export default function Billing() {
 
   return (
     <motion.div {...pageEnter}>
-      <h1 className="font-display text-page-title text-ink mb-2">Billing</h1>
-      <p className="text-body text-graphite mb-8">Credits cover question generation and short-answer grading.</p>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Billing</h1>
+      <p className="text-gray-400 mb-8">Credits cover question generation and short-answer grading.</p>
 
-      <Card className="mb-8">
-        <p className="text-label text-graphite mb-2">Current balance</p>
-        <p className="font-mono text-[32px] text-ink tabular-nums">{balance != null ? balance.toLocaleString() : '—'}</p>
+      <Card className="mb-8" animate={false}>
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Current balance</p>
+        <p className="font-mono text-4xl text-white tabular-nums">{balance != null ? balance.toLocaleString() : '—'}</p>
       </Card>
 
-      <h2 className="text-section-head text-ink mb-4">Buy credits</h2>
+      <h2 className="text-xl font-black text-white mb-4">Buy credits</h2>
       <div className="grid md:grid-cols-3 gap-6 mb-10">
-        {packs?.map((pack) => (
-          <Card key={pack._id}>
-            <p className="text-label text-graphite mb-2">{pack.name}</p>
-            <p className="font-mono text-[24px] text-ink tabular-nums mb-1">
+        {packs?.map((pack, i) => (
+          <Card key={pack._id} delay={i * 0.05}>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{pack.name}</p>
+            <p className="font-mono text-2xl text-white tabular-nums mb-1">
               {(pack.priceKobo / 100).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 })}
             </p>
-            <p className="text-small text-pencil font-mono mb-4">{pack.credits.toLocaleString()} credits</p>
+            <p className="text-sm text-gray-500 font-mono mb-4">{pack.credits.toLocaleString()} credits</p>
             <Button variant="marker" className="w-full" disabled={purchaseMutation.isPending} onClick={() => purchaseMutation.mutate(pack._id)}>
               Buy
             </Button>
@@ -66,7 +66,7 @@ export default function Billing() {
         ))}
       </div>
 
-      <h2 className="text-section-head text-ink mb-4">Transaction history</h2>
+      <h2 className="text-xl font-black text-white mb-4">Transaction history</h2>
       {isLoading && <SkeletonRows rows={4} />}
       {ledger?.length > 0 && (
         <Table>
@@ -82,10 +82,10 @@ export default function Billing() {
           <tbody>
             {ledger.map((entry) => (
               <Tr key={entry._id}>
-                <Td mono className="text-graphite">{new Date(entry.createdAt).toLocaleDateString()}</Td>
-                <Td>{TYPE_LABEL[entry.type]}</Td>
-                <Td className="text-graphite">{entry.description}</Td>
-                <Td numeric mono className={entry.amount < 0 ? 'text-fail' : 'text-pass'}>
+                <Td mono>{new Date(entry.createdAt).toLocaleDateString()}</Td>
+                <Td className="text-white">{TYPE_LABEL[entry.type]}</Td>
+                <Td>{entry.description}</Td>
+                <Td numeric mono className={entry.amount < 0 ? 'text-red-400' : 'text-green-400'}>
                   {entry.amount > 0 ? '+' : ''}{entry.amount}
                 </Td>
                 <Td numeric mono>{entry.balanceAfter}</Td>

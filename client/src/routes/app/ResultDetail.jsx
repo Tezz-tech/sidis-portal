@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { AlertTriangle, Check, X, Pencil } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
+import Card from '../../components/console/Card';
+import Badge from '../../components/console/Badge';
+import Button from '../../components/console/Button';
+import Modal from '../../components/console/Modal';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Textarea from '../../components/console/Textarea';
 import { pageEnter } from '../../lib/motion';
 
 export default function ResultDetail() {
@@ -50,22 +50,22 @@ export default function ResultDetail() {
 
   return (
     <motion.div {...pageEnter} className="max-w-3xl">
-      <h1 className="font-display text-page-title text-ink mb-1">
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-1">
         {result.participant.firstName} {result.participant.lastName}
       </h1>
-      <p className="text-body text-graphite mb-8 font-mono">{result.participant.email}</p>
+      <p className="text-gray-400 mb-8 font-mono">{result.participant.email}</p>
 
       <div className="grid grid-cols-3 gap-6 mb-8">
-        <Card>
-          <p className="text-label text-graphite mb-2">Score</p>
-          <p className="font-mono text-[24px] text-ink tabular-nums">{result.score}</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Score</p>
+          <p className="font-mono text-2xl text-white tabular-nums">{result.score}</p>
         </Card>
-        <Card>
-          <p className="text-label text-graphite mb-2">Percentage</p>
-          <p className="font-mono text-[24px] text-ink tabular-nums">{result.percentage}%</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Percentage</p>
+          <p className="font-mono text-2xl text-white tabular-nums">{result.percentage}%</p>
         </Card>
-        <Card>
-          <p className="text-label text-graphite mb-2">Result</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Result</p>
           {result.status === 'graded' ? (
             <Badge variant={result.passed ? 'pass' : 'fail'}>{result.passed ? 'Passed' : 'Failed'}</Badge>
           ) : (
@@ -75,10 +75,10 @@ export default function ResultDetail() {
       </div>
 
       {integrityCount > 0 && (
-        <Card className="mb-8 border-marker/30 bg-marker-wash">
-          <div className="flex items-center gap-2 text-marker-deep">
-            <AlertTriangle size={16} strokeWidth={1.5} />
-            <p className="text-body">
+        <Card className="mb-8 border-orange-400/30 bg-orange-400/5" animate={false}>
+          <div className="flex items-center gap-2 text-orange-300">
+            <AlertTriangle size={16} strokeWidth={1.75} />
+            <p>
               {result.integrity.tabSwitches} tab switch{result.integrity.tabSwitches === 1 ? '' : 'es'},{' '}
               {result.integrity.windowBlurs} window blur{result.integrity.windowBlurs === 1 ? '' : 's'},{' '}
               {result.integrity.fullscreenExits} fullscreen exit{result.integrity.fullscreenExits === 1 ? '' : 's'} recorded during this attempt.
@@ -89,38 +89,38 @@ export default function ResultDetail() {
 
       <div className="space-y-4">
         {result.answers.map((a, i) => (
-          <div key={a.questionId} className="bg-paper border border-rule rounded-card p-5">
+          <div key={a.questionId} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-small text-pencil tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-sm text-gray-500 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                 {a.isCorrect ? (
-                  <Check size={16} strokeWidth={2} className="text-pass" />
+                  <Check size={16} strokeWidth={2} className="text-green-400" />
                 ) : (
-                  <X size={16} strokeWidth={2} className="text-fail" />
+                  <X size={16} strokeWidth={2} className="text-red-400" />
                 )}
-                <span className="font-mono text-small text-graphite">{a.pointsAwarded} / {a.maxPoints} pts</span>
+                <span className="font-mono text-sm text-gray-400">{a.pointsAwarded} / {a.maxPoints} pts</span>
                 {a.flaggedForReview && (
-                  <span className="inline-flex items-center gap-1 text-small text-marker-deep">
-                    <AlertTriangle size={12} strokeWidth={1.5} /> Low confidence ({Math.round((a.aiConfidence || 0) * 100)}%)
+                  <span className="inline-flex items-center gap-1 text-sm text-orange-400">
+                    <AlertTriangle size={12} strokeWidth={1.75} /> Low confidence ({Math.round((a.aiConfidence || 0) * 100)}%)
                   </span>
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => openOverride(a)}
-                className="text-small text-graphite hover:text-ink inline-flex items-center gap-1"
+                className="text-sm text-gray-400 hover:text-white inline-flex items-center gap-1 transition-colors duration-200"
               >
-                <Pencil size={14} strokeWidth={1.5} /> Override
+                <Pencil size={14} strokeWidth={1.75} /> Override
               </button>
             </div>
-            <p className="text-body text-ink mb-2">{a.prompt}</p>
-            <p className="text-small text-graphite mb-1">
-              Response: <span className="text-ink">{a.selectedOptionKey || a.textAnswer || '(no answer)'}</span>
+            <p className="text-white mb-2">{a.prompt}</p>
+            <p className="text-sm text-gray-400 mb-1">
+              Response: <span className="text-white">{a.selectedOptionKey || a.textAnswer || '(no answer)'}</span>
             </p>
             {a.type === 'short_answer' && a.aiReasoning && (
-              <p className="text-small text-pencil italic mt-2">AI reasoning: {a.aiReasoning}</p>
+              <p className="text-sm text-gray-500 italic mt-2">AI reasoning: {a.aiReasoning}</p>
             )}
-            {a.overriddenBy && <p className="text-small text-marker-deep mt-2">Overridden: {a.overrideReason}</p>}
+            {a.overriddenBy && <p className="text-sm text-orange-400 mt-2">Overridden: {a.overrideReason}</p>}
           </div>
         ))}
       </div>

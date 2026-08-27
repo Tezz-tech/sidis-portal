@@ -23,20 +23,22 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-sheet flex">
-      <aside className="fixed inset-y-0 left-0 w-[248px] bg-ink flex flex-col">
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-950 via-black to-gray-950">
+      <aside className="fixed inset-y-0 left-0 w-[248px] bg-white/5 backdrop-blur-2xl border-r border-white/10 flex flex-col">
         <div className="h-16 flex items-center px-6">
-          <span className="font-display text-paper text-[18px] tracking-wide">SIDIS</span>
+          <span className="text-lg font-black text-white tracking-tight">
+            Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
+          </span>
         </div>
-        <nav className="flex-1 px-3 py-2 space-y-0.5">
+        <nav className="flex-1 px-3 py-2 space-y-1">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `relative flex items-center gap-3 px-3 py-2.5 rounded-card text-body transition-colors duration-micro ${
-                  isActive ? 'text-paper bg-white/5' : 'text-paper/60 hover:text-paper hover:bg-white/5'
+                `relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                  isActive ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`
               }
             >
@@ -45,12 +47,12 @@ export default function AdminLayout() {
                   {isActive && (
                     <motion.span
                       layoutId="sidebar-active"
-                      className="absolute left-0 top-1 bottom-1 w-[3px] bg-marker rounded-full"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-pink-600/20 border border-orange-500/30"
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     />
                   )}
-                  <item.icon size={18} strokeWidth={1.5} />
-                  {item.label}
+                  <item.icon size={18} strokeWidth={1.75} className="relative" />
+                  <span className="relative">{item.label}</span>
                 </>
               )}
             </NavLink>
@@ -58,22 +60,22 @@ export default function AdminLayout() {
         </nav>
         <div className="px-3 py-4 border-t border-white/10">
           <div className="px-3 py-2 mb-1">
-            <p className="text-small text-paper truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-small text-paper/50 truncate">{user?.email}</p>
+            <p className="text-sm text-white truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-card text-body text-paper/60 hover:text-paper hover:bg-white/5 transition-colors duration-micro"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors duration-200"
           >
-            <LogOut size={18} strokeWidth={1.5} />
+            <LogOut size={18} strokeWidth={1.75} />
             Sign out
           </button>
         </div>
       </aside>
 
       <main className="flex-1 ml-[248px]">
-        <div className="max-w-admin mx-auto px-6 py-8 md:px-6">
+        <div className="max-w-[1280px] mx-auto px-6 py-8 md:px-6">
           <Outlet />
         </div>
       </main>

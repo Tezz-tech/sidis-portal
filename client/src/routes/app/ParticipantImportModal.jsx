@@ -3,10 +3,10 @@ import { toast } from 'sonner';
 import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { parseCsv } from '../../lib/csv';
 import api, { apiErrorMessage } from '../../lib/api';
-import Modal from '../../components/ui/Modal';
-import Button from '../../components/ui/Button';
-import { Label } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import Modal from '../../components/console/Modal';
+import Button from '../../components/console/Button';
+import { Label } from '../../components/console/Input';
+import Select from '../../components/console/Select';
 
 const FIELDS = [
   { key: 'email', label: 'Email', required: true },
@@ -101,8 +101,8 @@ export default function ParticipantImportModal({ open, onClose, onImported }) {
       {!headers ? (
         <div className="text-center py-10">
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-          <Upload size={24} strokeWidth={1.5} className="text-graphite mx-auto mb-3" />
-          <p className="text-body text-graphite mb-4">Upload a CSV with one row per participant.</p>
+          <Upload size={24} strokeWidth={1.75} className="text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-400 mb-4">Upload a CSV with one row per participant.</p>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>Choose file</Button>
         </div>
       ) : (
@@ -116,27 +116,27 @@ export default function ParticipantImportModal({ open, onClose, onImported }) {
                   value={mapping[f.key] ?? ''}
                   onChange={(e) => setMapping((m) => ({ ...m, [f.key]: e.target.value === '' ? undefined : Number(e.target.value) }))}
                 >
-                  <option value="">Not mapped</option>
-                  {headers.map((h, i) => <option key={i} value={i}>{h}</option>)}
+                  <option value="" className="bg-gray-900">Not mapped</option>
+                  {headers.map((h, i) => <option key={i} value={i} className="bg-gray-900">{h}</option>)}
                 </Select>
               </div>
             ))}
           </div>
 
           <div>
-            <p className="text-label text-graphite mb-2">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
               Preview — {validCount} of {rows.length} rows valid
             </p>
-            <div className="max-h-64 overflow-y-auto border border-rule rounded-card">
-              <table className="w-full text-small">
+            <div className="max-h-64 overflow-y-auto border border-white/10 rounded-2xl">
+              <table className="w-full text-sm">
                 <tbody>
                   {validated.slice(0, 50).map((r, i) => (
-                    <tr key={i} className="border-b border-rule last:border-0">
+                    <tr key={i} className="border-b border-white/10 last:border-0">
                       <td className="px-3 py-2 w-6">
-                        {r.valid ? <CheckCircle2 size={14} strokeWidth={1.5} className="text-pass" /> : <AlertCircle size={14} strokeWidth={1.5} className="text-fail" />}
+                        {r.valid ? <CheckCircle2 size={14} strokeWidth={1.75} className="text-green-400" /> : <AlertCircle size={14} strokeWidth={1.75} className="text-red-400" />}
                       </td>
-                      <td className="px-3 py-2 text-ink">{r.firstName} {r.lastName}</td>
-                      <td className="px-3 py-2 text-graphite font-mono">{r.email || '—'}</td>
+                      <td className="px-3 py-2 text-white">{r.firstName} {r.lastName}</td>
+                      <td className="px-3 py-2 text-gray-400 font-mono">{r.email || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

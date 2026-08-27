@@ -5,12 +5,12 @@ import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
-import Modal from '../../components/ui/Modal';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Select from '../../components/console/Select';
+import Modal from '../../components/console/Modal';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 export default function Team() {
@@ -44,10 +44,10 @@ export default function Team() {
   return (
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-page-title text-ink">Team</h1>
+        <h1 className="text-3xl md:text-4xl font-black text-white">Team</h1>
         {user?.role === 'org_admin' && (
           <Button variant="marker" onClick={() => setInviteOpen(true)}>
-            <UserPlus size={16} strokeWidth={1.5} /> Invite team member
+            <UserPlus size={16} strokeWidth={1.75} /> Invite team member
           </Button>
         )}
       </div>
@@ -66,15 +66,15 @@ export default function Team() {
           <tbody>
             {team.map((member) => (
               <Tr key={member.id}>
-                <Td>{member.firstName} {member.lastName}</Td>
-                <Td mono className="text-graphite">{member.email}</Td>
+                <Td className="text-white">{member.firstName} {member.lastName}</Td>
+                <Td mono>{member.email}</Td>
                 <Td className="capitalize">{member.role.replace('_', ' ')}</Td>
                 <Td><Badge variant={member.status === 'active' ? 'pass' : 'neutral'}>{member.status}</Badge></Td>
                 <Td className="text-right">
                   {user?.role === 'org_admin' && member.id !== user.id && (
                     <button
                       type="button"
-                      className="text-small text-graphite hover:text-ink"
+                      className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
                       onClick={() => statusMutation.mutate({ id: member.id, status: member.status === 'active' ? 'disabled' : 'active' })}
                     >
                       {member.status === 'active' ? 'Disable' : 'Enable'}
@@ -118,8 +118,8 @@ export default function Team() {
           <div>
             <Label htmlFor="t-role">Role</Label>
             <Select id="t-role" value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}>
-              <option value="creator">Creator — can build and manage exams</option>
-              <option value="org_admin">Admin — full access, including billing and team</option>
+              <option value="creator" className="bg-gray-900">Creator — can build and manage exams</option>
+              <option value="org_admin" className="bg-gray-900">Admin — full access, including billing and team</option>
             </Select>
           </div>
           <FieldError>{formError}</FieldError>

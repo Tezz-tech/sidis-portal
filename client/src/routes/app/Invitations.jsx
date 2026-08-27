@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Send, RotateCw } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import EmptyState from '../../components/ui/EmptyState';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Card from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import EmptyState from '../../components/console/EmptyState';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 const STATUS_VARIANT = { sent: 'neutral', opened: 'neutral', started: 'marker', submitted: 'pass', expired: 'fail' };
@@ -83,28 +83,28 @@ export default function Invitations() {
       {!isPublished && (
         <>
           {exam.status !== 'review' || !exam.reviewConfirmedAt ? (
-            <Card>
-              <p className="text-body text-graphite">Confirm the question set before you can invite participants.</p>
+            <Card animate={false}>
+              <p className="text-gray-400">Confirm the question set before you can invite participants.</p>
             </Card>
           ) : (
-            <Card padded={false}>
-              <div className="p-6 flex items-center justify-between border-b border-rule">
-                <p className="text-body text-graphite">{selected.size} of {participants?.length || 0} selected</p>
+            <Card padded={false} animate={false}>
+              <div className="p-6 flex items-center justify-between border-b border-white/10">
+                <p className="text-gray-400">{selected.size} of {participants?.length || 0} selected</p>
                 <Button
                   variant="marker"
                   disabled={selected.size === 0 || publishMutation.isPending}
                   onClick={() => publishMutation.mutate(Array.from(selected))}
                 >
-                  <Send size={16} strokeWidth={1.5} /> Publish and invite {selected.size || ''}
+                  <Send size={16} strokeWidth={1.75} /> Publish and invite {selected.size || ''}
                 </Button>
               </div>
               <div className="max-h-[420px] overflow-y-auto">
                 {(participants || []).map((p) => (
-                  <label key={p._id} className="flex items-center gap-3 px-6 py-3 border-b border-rule last:border-0 hover:bg-sheet cursor-pointer">
-                    <input type="checkbox" checked={selected.has(p._id)} onChange={() => toggle(p._id)} className="accent-marker w-4 h-4" />
+                  <label key={p._id} className="flex items-center gap-3 px-6 py-3 border-b border-white/10 last:border-0 hover:bg-white/5 cursor-pointer">
+                    <input type="checkbox" checked={selected.has(p._id)} onChange={() => toggle(p._id)} className="accent-orange-500 w-4 h-4" />
                     <div>
-                      <p className="text-body text-ink">{p.firstName} {p.lastName}</p>
-                      <p className="text-small text-pencil font-mono">{p.email}</p>
+                      <p className="text-white">{p.firstName} {p.lastName}</p>
+                      <p className="text-sm text-gray-500 font-mono">{p.email}</p>
                     </div>
                   </label>
                 ))}
@@ -126,7 +126,7 @@ export default function Invitations() {
                 onClick={() => sendMoreMutation.mutate(notYetInvited.map((p) => p._id))}
                 disabled={sendMoreMutation.isPending}
               >
-                <Send size={16} strokeWidth={1.5} /> Invite {notYetInvited.length} more
+                <Send size={16} strokeWidth={1.75} /> Invite {notYetInvited.length} more
               </Button>
             </div>
           )}
@@ -148,8 +148,8 @@ export default function Invitations() {
                 {invitations.map((inv) => (
                   <Tr key={inv._id}>
                     <Td>
-                      <p className="text-ink">{inv.participant.firstName} {inv.participant.lastName}</p>
-                      <p className="text-small text-pencil font-mono">{inv.participant.email}</p>
+                      <p className="text-white">{inv.participant.firstName} {inv.participant.lastName}</p>
+                      <p className="text-sm text-gray-500 font-mono">{inv.participant.email}</p>
                     </Td>
                     <Td><Badge variant={STATUS_VARIANT[inv.status]}>{STATUS_LABEL[inv.status]}</Badge></Td>
                     <Td className="text-right">
@@ -157,9 +157,9 @@ export default function Invitations() {
                         <button
                           type="button"
                           onClick={() => resendMutation.mutate(inv._id)}
-                          className="text-small text-marker-deep hover:underline inline-flex items-center gap-1"
+                          className="text-sm text-orange-400 hover:text-orange-300 inline-flex items-center gap-1 transition-colors duration-200"
                         >
-                          <RotateCw size={14} strokeWidth={1.5} /> Resend
+                          <RotateCw size={14} strokeWidth={1.75} /> Resend
                         </button>
                       )}
                     </Td>

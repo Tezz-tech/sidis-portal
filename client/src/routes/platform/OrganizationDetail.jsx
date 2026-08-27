@@ -4,14 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card, { CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
-import Input, { Label, FieldError } from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
-import Select from '../../components/ui/Select';
-import Modal from '../../components/ui/Modal';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
+import Card, { CardTitle } from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import Badge from '../../components/console/Badge';
+import Input, { Label, FieldError } from '../../components/console/Input';
+import Textarea from '../../components/console/Textarea';
+import Select from '../../components/console/Select';
+import Modal from '../../components/console/Modal';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
 import { pageEnter } from '../../lib/motion';
 
 const EXAM_STATUS_VARIANT = { draft: 'neutral', generating: 'marker', review: 'marker', published: 'ink', closed: 'neutral' };
@@ -111,8 +111,8 @@ export default function OrganizationDetail() {
     <motion.div {...pageEnter}>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display text-page-title text-ink">{org.name}</h1>
-          <p className="text-body text-graphite mt-1 capitalize">{org.type} · <Badge variant={org.status === 'active' ? 'pass' : 'fail'}>{org.status}</Badge></p>
+          <h1 className="text-3xl md:text-4xl font-black text-white">{org.name}</h1>
+          <p className="text-gray-400 mt-1 capitalize flex items-center gap-2">{org.type} · <Badge variant={org.status === 'active' ? 'pass' : 'fail'}>{org.status}</Badge></p>
         </div>
         <div className="flex gap-3">
           <Button variant="secondary" onClick={() => setEditOpen(true)}>Edit</Button>
@@ -125,21 +125,21 @@ export default function OrganizationDetail() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <p className="text-label text-graphite mb-2">Credit balance</p>
-          <p className="font-mono text-[24px] text-ink tabular-nums">{org.creditBalance.toLocaleString()}</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Credit balance</p>
+          <p className="font-mono text-2xl text-white tabular-nums">{org.creditBalance.toLocaleString()}</p>
         </Card>
-        <Card>
-          <p className="text-label text-graphite mb-2">Exams</p>
-          <p className="font-mono text-[24px] text-ink tabular-nums">{org.examCount}</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Exams</p>
+          <p className="font-mono text-2xl text-white tabular-nums">{org.examCount}</p>
         </Card>
-        <Card>
-          <p className="text-label text-graphite mb-2">Attempts</p>
-          <p className="font-mono text-[24px] text-ink tabular-nums">{org.attemptCount}</p>
+        <Card animate={false}>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Attempts</p>
+          <p className="font-mono text-2xl text-white tabular-nums">{org.attemptCount}</p>
         </Card>
       </div>
 
-      <Card className="mb-8">
+      <Card className="mb-8" animate={false}>
         <CardTitle>Team</CardTitle>
         {team?.length > 0 && (
           <Table className="mt-4">
@@ -155,16 +155,16 @@ export default function OrganizationDetail() {
             <tbody>
               {team.map((member) => (
                 <Tr key={member.id}>
-                  <Td>{member.firstName} {member.lastName}</Td>
-                  <Td className="text-graphite">{member.email}</Td>
+                  <Td className="text-white">{member.firstName} {member.lastName}</Td>
+                  <Td>{member.email}</Td>
                   <Td>
                     <div className="w-36">
                       <Select
                         value={member.role}
                         onChange={(e) => roleMutation.mutate({ userId: member.id, role: e.target.value })}
                       >
-                        <option value="org_admin">Org admin</option>
-                        <option value="creator">Creator</option>
+                        <option value="org_admin" className="bg-gray-900">Org admin</option>
+                        <option value="creator" className="bg-gray-900">Creator</option>
                       </Select>
                     </div>
                   </Td>
@@ -187,7 +187,7 @@ export default function OrganizationDetail() {
         )}
       </Card>
 
-      <Card className="mb-8">
+      <Card className="mb-8" animate={false}>
         <CardTitle>Exams</CardTitle>
         {exams?.length > 0 && (
           <Table className="mt-4">
@@ -203,10 +203,10 @@ export default function OrganizationDetail() {
             <tbody>
               {exams.map((exam) => (
                 <Tr key={exam._id}>
-                  <Td>{exam.title}</Td>
+                  <Td className="text-white">{exam.title}</Td>
                   <Td><Badge variant={EXAM_STATUS_VARIANT[exam.status] || 'neutral'}>{exam.status}</Badge></Td>
                   <Td numeric mono>{exam.questionCount}</Td>
-                  <Td mono className="text-graphite">{new Date(exam.createdAt).toLocaleDateString()}</Td>
+                  <Td mono>{new Date(exam.createdAt).toLocaleDateString()}</Td>
                   <Td>
                     {exam.status === 'published' && (
                       <Button variant="danger" size="sm" onClick={() => closeExamMutation.mutate(exam._id)}>
@@ -236,10 +236,10 @@ export default function OrganizationDetail() {
           <tbody>
             {ledger.map((entry) => (
               <Tr key={entry._id}>
-                <Td mono className="text-graphite">{new Date(entry.createdAt).toLocaleDateString()}</Td>
-                <Td className="capitalize">{entry.type}</Td>
-                <Td className="text-graphite">{entry.description}</Td>
-                <Td numeric mono className={entry.amount < 0 ? 'text-fail' : 'text-pass'}>{entry.amount > 0 ? '+' : ''}{entry.amount}</Td>
+                <Td mono>{new Date(entry.createdAt).toLocaleDateString()}</Td>
+                <Td className="capitalize text-white">{entry.type}</Td>
+                <Td>{entry.description}</Td>
+                <Td numeric mono className={entry.amount < 0 ? 'text-red-400' : 'text-green-400'}>{entry.amount > 0 ? '+' : ''}{entry.amount}</Td>
                 <Td numeric mono>{entry.balanceAfter}</Td>
               </Tr>
             ))}
@@ -268,9 +268,9 @@ export default function OrganizationDetail() {
           <div>
             <Label htmlFor="e-type">Type</Label>
             <Select id="e-type" value={editForm.type} onChange={(e) => setEditForm((f) => ({ ...f, type: e.target.value }))}>
-              <option value="company">Company</option>
-              <option value="school">School</option>
-              <option value="other">Other</option>
+              <option value="company" className="bg-gray-900">Company</option>
+              <option value="school" className="bg-gray-900">School</option>
+              <option value="other" className="bg-gray-900">Other</option>
             </Select>
           </div>
           <div>

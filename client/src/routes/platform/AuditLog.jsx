@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
-import { Table, Thead, Tr, Th, Td } from '../../components/ui/Table';
-import { SkeletonRows } from '../../components/ui/Skeleton';
-import EmptyState from '../../components/ui/EmptyState';
+import { Table, Thead, Tr, Th, Td } from '../../components/console/Table';
+import { SkeletonRows } from '../../components/console/Skeleton';
+import EmptyState from '../../components/console/EmptyState';
 import { pageEnter } from '../../lib/motion';
 
 export default function AuditLog() {
@@ -14,8 +14,8 @@ export default function AuditLog() {
 
   return (
     <motion.div {...pageEnter}>
-      <h1 className="font-display text-page-title text-ink mb-2">Audit log</h1>
-      <p className="text-body text-graphite mb-8">Every sensitive action taken across the platform, most recent first.</p>
+      <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Audit log</h1>
+      <p className="text-gray-400 mb-8">Every sensitive action taken across the platform, most recent first.</p>
 
       {isLoading && <SkeletonRows rows={6} />}
 
@@ -35,11 +35,11 @@ export default function AuditLog() {
           <tbody>
             {entries.map((entry) => (
               <Tr key={entry._id}>
-                <Td mono className="text-graphite whitespace-nowrap">{new Date(entry.createdAt).toLocaleString()}</Td>
-                <Td className="font-mono text-small">{entry.action}</Td>
-                <Td className="text-graphite">{entry.organization?.name || '—'}</Td>
-                <Td className="text-graphite">{entry.actor ? `${entry.actor.firstName} ${entry.actor.lastName}` : 'System'}</Td>
-                <Td className="text-graphite text-small">{entry.targetModel ? `${entry.targetModel} · ${entry.targetId}` : '—'}</Td>
+                <Td mono className="whitespace-nowrap">{new Date(entry.createdAt).toLocaleString()}</Td>
+                <Td className="font-mono text-sm text-white">{entry.action}</Td>
+                <Td>{entry.organization?.name || '—'}</Td>
+                <Td>{entry.actor ? `${entry.actor.firstName} ${entry.actor.lastName}` : 'System'}</Td>
+                <Td className="text-sm">{entry.targetModel ? `${entry.targetModel} · ${entry.targetId}` : '—'}</Td>
               </Tr>
             ))}
           </tbody>

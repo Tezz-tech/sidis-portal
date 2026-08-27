@@ -5,10 +5,10 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Check } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { Label } from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
+import Card from '../../components/console/Card';
+import Button from '../../components/console/Button';
+import { Label } from '../../components/console/Input';
+import Select from '../../components/console/Select';
 import { pageEnter } from '../../lib/motion';
 
 const STEPS = [
@@ -66,8 +66,8 @@ export default function GenerateQuestions() {
     const currentIndex = STEPS.findIndex((s) => s.key === progress?.step);
     return (
       <motion.div {...pageEnter} className="max-w-lg mx-auto py-12">
-        <p className="text-body text-graphite text-center mb-8">Generating questions&hellip;</p>
-        <Card>
+        <p className="text-gray-400 text-center mb-8">Generating questions&hellip;</p>
+        <Card animate={false}>
           <ul className="space-y-4">
             {STEPS.map((step, i) => {
               const done = currentIndex > i || progress?.step === 'done';
@@ -76,27 +76,27 @@ export default function GenerateQuestions() {
                 <li key={step.key} className="flex items-center gap-3">
                   <span
                     className={`w-6 h-6 rounded-full flex items-center justify-center border-2 shrink-0 ${
-                      done ? 'bg-ink border-ink' : active ? 'border-marker' : 'border-rule'
+                      done ? 'bg-gradient-to-br from-orange-500 to-pink-600 border-transparent' : active ? 'border-orange-500' : 'border-white/15'
                     }`}
                   >
-                    {done && <Check size={14} strokeWidth={2} className="text-paper" />}
+                    {done && <Check size={14} strokeWidth={2} className="text-white" />}
                   </span>
-                  <span className={`text-body ${done || active ? 'text-ink' : 'text-pencil'}`}>{step.label}</span>
+                  <span className={`${done || active ? 'text-white' : 'text-gray-500'}`}>{step.label}</span>
                 </li>
               );
             })}
           </ul>
         </Card>
-        <p className="text-small text-pencil text-center mt-4">This usually takes under a minute. You can leave this page — we will email you when it is ready.</p>
+        <p className="text-sm text-gray-500 text-center mt-4">This usually takes under a minute. You can leave this page — we will email you when it is ready.</p>
       </motion.div>
     );
   }
 
   return (
     <motion.div {...pageEnter} className="max-w-lg mx-auto py-12">
-      <p className="text-body text-graphite mb-8">Choose how many questions to generate from the source document, and how they should be mixed.</p>
+      <p className="text-gray-400 mb-8">Choose how many questions to generate from the source document, and how they should be mixed.</p>
 
-      <Card className="space-y-6">
+      <Card className="space-y-6" animate={false}>
         <div>
           <Label htmlFor="count">Number of questions</Label>
           <input
@@ -107,37 +107,37 @@ export default function GenerateQuestions() {
             step={5}
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
-            className="w-full accent-marker"
+            className="w-full accent-orange-500"
           />
           <div className="flex items-center justify-between mt-1">
-            <span className="font-mono text-[20px] text-ink tabular-nums">{count}</span>
-            <span className="text-small text-pencil">questions</span>
+            <span className="font-mono text-xl text-white tabular-nums">{count}</span>
+            <span className="text-sm text-gray-500">questions</span>
           </div>
         </div>
 
         <div>
           <Label htmlFor="typeMix">Question types</Label>
           <Select id="typeMix" value={typeMix} onChange={(e) => setTypeMix(e.target.value)}>
-            <option value="mixed">Mixed (multiple choice, true/false, short answer)</option>
-            <option value="mcq">Multiple choice only</option>
-            <option value="true_false">True / false only</option>
-            <option value="short_answer">Short answer only</option>
+            <option value="mixed" className="bg-gray-900">Mixed (multiple choice, true/false, short answer)</option>
+            <option value="mcq" className="bg-gray-900">Multiple choice only</option>
+            <option value="true_false" className="bg-gray-900">True / false only</option>
+            <option value="short_answer" className="bg-gray-900">Short answer only</option>
           </Select>
         </div>
 
         <div>
           <Label htmlFor="difficulty">Difficulty</Label>
           <Select id="difficulty" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="easy" className="bg-gray-900">Easy</option>
+            <option value="medium" className="bg-gray-900">Medium</option>
+            <option value="hard" className="bg-gray-900">Hard</option>
           </Select>
         </div>
 
-        <div className="border-t border-rule pt-5 flex items-center justify-between">
+        <div className="border-t border-white/10 pt-5 flex items-center justify-between">
           <div>
-            <p className="text-label text-graphite mb-1">Cost</p>
-            <p className="font-mono text-[22px] text-ink tabular-nums">{estimate ?? '—'} credits</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Cost</p>
+            <p className="font-mono text-2xl text-white tabular-nums">{estimate ?? '—'} credits</p>
           </div>
           <Button variant="marker" size="lg" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
             {generateMutation.isPending ? 'Starting...' : 'Generate questions'}
