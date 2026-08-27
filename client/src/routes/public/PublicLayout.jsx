@@ -110,7 +110,7 @@ export default function PublicLayout() {
             </div>
           </div>
           <div className="border-t border-white/10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-400">
               <span>&copy; {new Date().getFullYear()} Sidis</span>
               <Link to="/terms" className="hover:text-white transition-colors duration-300">Terms</Link>
               <Link to="/privacy" className="hover:text-white transition-colors duration-300">Privacy</Link>

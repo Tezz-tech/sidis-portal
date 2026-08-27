@@ -44,7 +44,7 @@ export default function InviteLanding() {
       {invite.organizationLogoUrl ? (
         <img src={invite.organizationLogoUrl} alt={invite.organizationName} className="h-10 mx-auto mb-6" />
       ) : (
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">{invite.organizationName}</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">{invite.organizationName}</p>
       )}
       <h1 className="text-3xl md:text-4xl font-black text-white mb-2">{invite.examTitle}</h1>
       <p className="text-gray-400 mb-8">{introText}</p>

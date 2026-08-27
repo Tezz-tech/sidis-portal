@@ -66,15 +66,15 @@ export default function ResultDetail() {
 
       <div className="grid grid-cols-3 gap-6 mb-8">
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Score</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Score</p>
           <p className="font-mono text-2xl text-white tabular-nums">{result.score}</p>
         </Card>
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Percentage</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Percentage</p>
           <p className="font-mono text-2xl text-white tabular-nums">{result.percentage}%</p>
         </Card>
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Result</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Result</p>
           {result.status === 'graded' ? (
             <Badge variant={result.passed ? 'pass' : 'fail'}>{result.passed ? 'Passed' : 'Failed'}</Badge>
           ) : result.gradingFailReason ? (
@@ -123,7 +123,7 @@ export default function ResultDetail() {
           <div key={a.questionId} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm text-gray-500 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-sm text-gray-400 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                 {a.isCorrect ? (
                   <Check size={16} strokeWidth={2} className="text-green-400" />
                 ) : (
@@ -149,7 +149,7 @@ export default function ResultDetail() {
               Response: <span className="text-white">{a.selectedOptionKey || a.textAnswer || '(no answer)'}</span>
             </p>
             {a.type === 'short_answer' && a.aiReasoning && (
-              <p className="text-sm text-gray-500 italic mt-2">AI reasoning: {a.aiReasoning}</p>
+              <p className="text-sm text-gray-400 italic mt-2">AI reasoning: {a.aiReasoning}</p>
             )}
             {a.overriddenBy && <p className="text-sm text-orange-400 mt-2">Overridden: {a.overrideReason}</p>}
           </div>

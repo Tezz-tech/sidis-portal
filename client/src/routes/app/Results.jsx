@@ -53,7 +53,7 @@ export default function Results() {
               <Tr key={r.attemptId}>
                 <Td>
                   <p className="text-white">{r.participant.firstName} {r.participant.lastName}</p>
-                  <p className="text-sm text-gray-500 font-mono">{r.participant.email}</p>
+                  <p className="text-sm text-gray-400 font-mono">{r.participant.email}</p>
                 </Td>
                 <Td>
                   <Badge variant={r.status === 'graded' ? 'neutral' : r.gradingFailReason ? 'fail' : 'marker'}>

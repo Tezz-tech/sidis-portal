@@ -143,15 +143,15 @@ export default function OrganizationDetail() {
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Credit balance</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Credit balance</p>
           <p className="font-mono text-2xl text-white tabular-nums">{org.creditBalance.toLocaleString()}</p>
         </Card>
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Exams</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Exams</p>
           <p className="font-mono text-2xl text-white tabular-nums">{org.examCount}</p>
         </Card>
         <Card animate={false}>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Attempts</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Attempts</p>
           <p className="font-mono text-2xl text-white tabular-nums">{org.attemptCount}</p>
         </Card>
       </div>

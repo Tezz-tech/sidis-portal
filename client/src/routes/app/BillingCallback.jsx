@@ -47,7 +47,7 @@ export default function BillingCallback() {
             <p className="text-gray-400 mb-1">
               {result.creditsPurchased} credits added.
             </p>
-            <p className="text-sm text-gray-500 font-mono mb-6">
+            <p className="text-sm text-gray-400 font-mono mb-6">
               New balance: {result.creditBalance.toLocaleString()} credits
             </p>
             <Button to="/app/billing" variant="marker">Back to billing</Button>

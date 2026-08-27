@@ -120,10 +120,10 @@ export default function QuestionReview() {
           <div key={q._id} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm text-gray-500 tabular-nums w-6">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-mono text-sm text-gray-400 tabular-nums w-6">{String(i + 1).padStart(2, '0')}</span>
                 <Badge variant="neutral">{TYPE_LABEL[q.type]}</Badge>
                 <Badge variant={q.source === 'manual' ? 'neutral' : 'marker'}>{SOURCE_LABEL[q.source]}</Badge>
-                <span className="text-sm text-gray-500 font-mono">{q.points} pt{q.points === 1 ? '' : 's'}</span>
+                <span className="text-sm text-gray-400 font-mono">{q.points} pt{q.points === 1 ? '' : 's'}</span>
               </div>
               <div className="flex items-center gap-1">
                 <IconButton label="Move up" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={16} strokeWidth={1.75} /></IconButton>
@@ -155,7 +155,7 @@ export default function QuestionReview() {
                       opt.key === q.correctOptionKey ? 'border-green-400/40 bg-green-400/10 text-white' : 'border-white/10 text-gray-400'
                     }`}
                   >
-                    <span className="font-mono text-gray-500">{opt.key}</span>
+                    <span className="font-mono text-gray-400">{opt.key}</span>
                     {opt.text}
                   </div>
                 ))}
@@ -170,7 +170,7 @@ export default function QuestionReview() {
 
             {q.sourceExcerpt && (
               <div className="flex gap-2 pl-3 border-l-2 border-white/15 text-sm text-gray-400 italic">
-                <Quote size={14} strokeWidth={1.75} className="text-gray-500 shrink-0 mt-0.5" />
+                <Quote size={14} strokeWidth={1.75} className="text-gray-400 shrink-0 mt-0.5" />
                 {q.sourceExcerpt}
               </div>
             )}

@@ -159,7 +159,7 @@ export default function Runner() {
       <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-gray-950/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between mb-6">
         <p className="text-white font-medium truncate">{state.examTitle}</p>
         <div className="flex items-center gap-3">
-          {savedAt && <span className="text-sm text-gray-500 font-mono hidden sm:inline">Saved</span>}
+          {savedAt && <span className="text-sm text-gray-400 font-mono hidden sm:inline">Saved</span>}
           <span className={clsx('font-mono text-2xl tabular-nums', isLowTime ? 'text-red-400 timer-pulse' : 'text-white')}>
             {formatDuration(secondsLeft)}
           </span>
@@ -169,7 +169,7 @@ export default function Runner() {
       <div className="md:grid md:grid-cols-[1fr_220px] md:gap-8">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest font-mono">QUESTION {currentIndex + 1} OF {questions.length}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono">QUESTION {currentIndex + 1} OF {questions.length}</p>
             <button
               type="button"
               onClick={toggleFlag}
@@ -201,7 +201,7 @@ export default function Runner() {
                     onChange={() => setAnswer({ selectedOptionKey: opt.key })}
                     className="accent-orange-500 w-4 h-4"
                   />
-                  <span className="font-mono text-sm text-gray-500">{opt.key}</span>
+                  <span className="font-mono text-sm text-gray-400">{opt.key}</span>
                   <span className="text-white">{opt.text}</span>
                 </label>
               ))}
@@ -233,7 +233,7 @@ export default function Runner() {
         </div>
 
         <div className="hidden md:block">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Questions</p>
           <BubbleRow items={bubbleItems} size="sm" onSelect={(item, i) => setCurrentIndex(i)} />
         </div>
       </div>

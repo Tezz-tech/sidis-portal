@@ -11,7 +11,7 @@ export default function Privacy() {
     <motion.div {...pageEnter} className="bg-gradient-to-b from-gray-950 to-black py-16 md:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">Privacy Policy</h1>
-        <p className="text-sm text-gray-500 mb-12">Effective {EFFECTIVE_DATE}</p>
+        <p className="text-sm text-gray-400 mb-12">Effective {EFFECTIVE_DATE}</p>
 
         <div className="space-y-10 text-gray-300 leading-relaxed">
           <p>

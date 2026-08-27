@@ -54,15 +54,15 @@ export default function Instructions() {
 
         <dl className="grid grid-cols-3 gap-4 mb-8 pb-8 border-b border-white/10">
           <div>
-            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Duration</dt>
+            <dt className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Duration</dt>
             <dd className="font-mono text-xl text-white tabular-nums">{invite.durationMinutes} min</dd>
           </div>
           <div>
-            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Questions</dt>
+            <dt className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Questions</dt>
             <dd className="font-mono text-xl text-white tabular-nums">{invite.questionCount}</dd>
           </div>
           <div>
-            <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Pass mark</dt>
+            <dt className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Pass mark</dt>
             <dd className="font-mono text-xl text-white tabular-nums">{invite.passMark}%</dd>
           </div>
         </dl>

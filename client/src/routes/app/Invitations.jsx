@@ -104,7 +104,7 @@ export default function Invitations() {
                     <input type="checkbox" checked={selected.has(p._id)} onChange={() => toggle(p._id)} className="accent-orange-500 w-4 h-4" />
                     <div>
                       <p className="text-white">{p.firstName} {p.lastName}</p>
-                      <p className="text-sm text-gray-500 font-mono">{p.email}</p>
+                      <p className="text-sm text-gray-400 font-mono">{p.email}</p>
                     </div>
                   </label>
                 ))}
@@ -149,7 +149,7 @@ export default function Invitations() {
                   <Tr key={inv._id}>
                     <Td>
                       <p className="text-white">{inv.participant.firstName} {inv.participant.lastName}</p>
-                      <p className="text-sm text-gray-500 font-mono">{inv.participant.email}</p>
+                      <p className="text-sm text-gray-400 font-mono">{inv.participant.email}</p>
                     </Td>
                     <Td><Badge variant={STATUS_VARIANT[inv.status]}>{STATUS_LABEL[inv.status]}</Badge></Td>
                     <Td className="text-right">

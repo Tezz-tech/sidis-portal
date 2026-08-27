@@ -16,7 +16,7 @@ export function Th({ className, numeric, children }) {
   return (
     <th
       className={clsx(
-        'border-b border-white/10 px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap',
+        'border-b border-white/10 px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap',
         numeric ? 'text-right' : 'text-left',
         className,
       )}

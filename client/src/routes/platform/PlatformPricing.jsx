@@ -75,7 +75,7 @@ export default function PlatformPricing() {
                 <Label htmlFor={`pack-price-${i}`}>Price (kobo)</Label>
                 <Input id={`pack-price-${i}`} type="number" mono value={pack.priceKobo} onChange={(e) => updatePack(i, { priceKobo: Number(e.target.value) })} />
               </div>
-              <button type="button" onClick={() => removePack(i)} className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 mb-0.5 transition-colors duration-200">
+              <button type="button" onClick={() => removePack(i)} className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 mb-0.5 transition-colors duration-200">
                 <Trash2 size={16} strokeWidth={1.75} />
               </button>
             </div>

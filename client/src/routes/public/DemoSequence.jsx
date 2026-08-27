@@ -56,7 +56,7 @@ export default function DemoSequence() {
                   <FileText size={20} strokeWidth={1.75} className="text-orange-400 shrink-0" />
                   <div>
                     <p className="text-white font-medium">{step.label}</p>
-                    <p className="text-xs text-gray-500">{step.meta}</p>
+                    <p className="text-xs text-gray-400">{step.meta}</p>
                   </div>
                 </div>
               )}
@@ -68,7 +68,7 @@ export default function DemoSequence() {
               )}
               {step.kind === 'question' && (
                 <div className="p-5 rounded-2xl border border-white/10 bg-white/5">
-                  <p className="text-xs font-bold tracking-widest text-gray-500 mb-2">QUESTION {step.number}</p>
+                  <p className="text-xs font-bold tracking-widest text-gray-400 mb-2">QUESTION {step.number}</p>
                   <p className="text-white mb-4 leading-relaxed">{step.prompt}</p>
                   <div className="space-y-2">
                     {step.options.map((opt, oi) => (

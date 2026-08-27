@@ -49,7 +49,7 @@ export default function Result() {
   return (
     <motion.div {...pageEnter}>
       <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-8 text-center mb-8">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{result.passed ? 'Passed' : 'Not passed'}</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{result.passed ? 'Passed' : 'Not passed'}</p>
         <p className="font-mono text-6xl text-white tabular-nums leading-none mb-2">{result.percentage}%</p>
         <p className="text-gray-400 font-mono mb-6">{result.score} / {result.totalPoints} points · pass mark {result.passMark}%</p>
         <Button variant="secondary" onClick={downloadPdf} disabled={downloading}>
@@ -67,12 +67,12 @@ export default function Result() {
                 ) : (
                   <X size={16} strokeWidth={2} className="text-red-400" />
                 )}
-                <span className="font-mono text-sm text-gray-500">{item.pointsAwarded} / {item.pointsPossible} pts</span>
+                <span className="font-mono text-sm text-gray-400">{item.pointsAwarded} / {item.pointsPossible} pts</span>
               </div>
               <p className="text-white mb-1">{item.prompt}</p>
               <p className="text-sm text-gray-400">Your answer: {item.yourAnswer || '(no answer)'}</p>
               {!item.isCorrect && <p className="text-sm text-green-400">Correct answer: {item.correctAnswer}</p>}
-              {item.explanation && <p className="text-sm text-gray-500 italic mt-1">Why: {item.explanation}</p>}
+              {item.explanation && <p className="text-sm text-gray-400 italic mt-1">Why: {item.explanation}</p>}
             </div>
           ))}
         </div>

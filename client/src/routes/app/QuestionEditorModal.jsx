@@ -113,7 +113,7 @@ export default function QuestionEditorModal({ open, onClose, onSave, initial, sa
                   </button>
                   <Input value={opt.text} onChange={(e) => updateOption(opt.key, e.target.value)} disabled={form.type === 'true_false'} />
                   {form.type === 'mcq' && form.options.length > 2 && (
-                    <button type="button" onClick={() => removeOption(opt.key)} className="text-gray-500 hover:text-red-400 text-sm px-2">Remove</button>
+                    <button type="button" onClick={() => removeOption(opt.key)} className="text-gray-400 hover:text-red-400 text-sm px-2">Remove</button>
                   )}
                 </div>
               ))}

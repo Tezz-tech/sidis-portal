@@ -46,7 +46,7 @@ export default function Billing() {
       <p className="text-gray-400 mb-8">Credits cover question generation and short-answer grading.</p>
 
       <Card className="mb-8" animate={false}>
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Current balance</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Current balance</p>
         <p className="font-mono text-4xl text-white tabular-nums">{balance != null ? balance.toLocaleString() : '—'}</p>
       </Card>
 
@@ -54,11 +54,11 @@ export default function Billing() {
       <div className="grid md:grid-cols-3 gap-6 mb-10">
         {packs?.map((pack, i) => (
           <Card key={pack._id} delay={i * 0.05}>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{pack.name}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{pack.name}</p>
             <p className="font-mono text-2xl text-white tabular-nums mb-1">
               {(pack.priceKobo / 100).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 })}
             </p>
-            <p className="text-sm text-gray-500 font-mono mb-4">{pack.credits.toLocaleString()} credits</p>
+            <p className="text-sm text-gray-400 font-mono mb-4">{pack.credits.toLocaleString()} credits</p>
             <Button variant="marker" className="w-full" disabled={purchaseMutation.isPending} onClick={() => purchaseMutation.mutate(pack._id)}>
               Buy
             </Button>

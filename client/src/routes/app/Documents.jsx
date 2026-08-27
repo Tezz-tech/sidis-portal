@@ -96,7 +96,7 @@ export default function Documents() {
                 <Tr key={doc._id}>
                   <Td>
                     <div className="flex items-center gap-2 text-white">
-                      <FileText size={16} strokeWidth={1.75} className="text-gray-500 shrink-0" />
+                      <FileText size={16} strokeWidth={1.75} className="text-gray-400 shrink-0" />
                       {doc.originalName}
                     </div>
                   </Td>
@@ -121,7 +121,7 @@ export default function Documents() {
                         type="button"
                         aria-label="Delete document"
                         onClick={() => deleteMutation.mutate(doc._id)}
-                        className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
+                        className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
                       >
                         <Trash2 size={16} strokeWidth={1.75} />
                       </button>

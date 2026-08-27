@@ -81,13 +81,13 @@ export default function GenerateQuestions() {
                   >
                     {done && <Check size={14} strokeWidth={2} className="text-white" />}
                   </span>
-                  <span className={`${done || active ? 'text-white' : 'text-gray-500'}`}>{step.label}</span>
+                  <span className={`${done || active ? 'text-white' : 'text-gray-400'}`}>{step.label}</span>
                 </li>
               );
             })}
           </ul>
         </Card>
-        <p className="text-sm text-gray-500 text-center mt-4">This usually takes under a minute. You can leave this page — we will email you when it is ready.</p>
+        <p className="text-sm text-gray-400 text-center mt-4">This usually takes under a minute. You can leave this page — we will email you when it is ready.</p>
       </motion.div>
     );
   }
@@ -111,7 +111,7 @@ export default function GenerateQuestions() {
           />
           <div className="flex items-center justify-between mt-1">
             <span className="font-mono text-xl text-white tabular-nums">{count}</span>
-            <span className="text-sm text-gray-500">questions</span>
+            <span className="text-sm text-gray-400">questions</span>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default function GenerateQuestions() {
 
         <div className="border-t border-white/10 pt-5 flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Cost</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Cost</p>
             <p className="font-mono text-2xl text-white tabular-nums">{estimate ?? '—'} credits</p>
           </div>
           <Button variant="marker" size="lg" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>

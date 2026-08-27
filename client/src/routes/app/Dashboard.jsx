@@ -40,12 +40,12 @@ export default function Dashboard() {
             <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white mb-4 shadow-lg`}>
               <stat.icon size={20} strokeWidth={1.75} />
             </div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
             <p className="text-3xl font-black text-white tabular-nums">{isLoading ? '—' : stat.format(data[stat.key])}</p>
             {stat.key === 'creditBalance' ? (
               <Link to="/app/billing" className="text-sm text-orange-400 hover:text-orange-300 mt-2 inline-block transition-colors duration-200">Buy more credits</Link>
             ) : (
-              stat.hint && <p className="text-sm text-gray-500 mt-2">{stat.hint}</p>
+              stat.hint && <p className="text-sm text-gray-400 mt-2">{stat.hint}</p>
             )}
           </Card>
         ))}
@@ -73,9 +73,9 @@ export default function Dashboard() {
                 >
                   <div>
                     <p className="text-white">{exam.title}</p>
-                    <p className="text-sm text-gray-500 font-mono">{exam.questionCount} questions</p>
+                    <p className="text-sm text-gray-400 font-mono">{exam.questionCount} questions</p>
                   </div>
-                  <ArrowRight size={16} strokeWidth={1.75} className="text-gray-500" />
+                  <ArrowRight size={16} strokeWidth={1.75} className="text-gray-400" />
                 </Link>
               ))}
             </div>
@@ -96,7 +96,7 @@ export default function Dashboard() {
                 <div key={attempt._id} className="flex items-center justify-between py-3 border-b border-white/10 last:border-0">
                   <div>
                     <p className="text-white">{attempt.participant?.firstName} {attempt.participant?.lastName}</p>
-                    <p className="text-sm text-gray-500">{attempt.exam?.title}</p>
+                    <p className="text-sm text-gray-400">{attempt.exam?.title}</p>
                   </div>
                   <Badge variant={attempt.status === 'graded' ? (attempt.passed ? 'pass' : 'fail') : 'neutral'}>
                     {attempt.status === 'graded' ? (attempt.passed ? 'Passed' : 'Failed') : 'Grading'}

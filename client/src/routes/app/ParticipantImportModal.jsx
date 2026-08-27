@@ -101,7 +101,7 @@ export default function ParticipantImportModal({ open, onClose, onImported }) {
       {!headers ? (
         <div className="text-center py-10">
           <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-          <Upload size={24} strokeWidth={1.75} className="text-gray-500 mx-auto mb-3" />
+          <Upload size={24} strokeWidth={1.75} className="text-gray-400 mx-auto mb-3" />
           <p className="text-gray-400 mb-4">Upload a CSV with one row per participant.</p>
           <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>Choose file</Button>
         </div>
@@ -124,7 +124,7 @@ export default function ParticipantImportModal({ open, onClose, onImported }) {
           </div>
 
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
               Preview — {validCount} of {rows.length} rows valid
             </p>
             <div className="max-h-64 overflow-y-auto border border-white/10 rounded-2xl">

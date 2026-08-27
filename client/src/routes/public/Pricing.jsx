@@ -73,7 +73,7 @@ export default function Pricing() {
                 <p className="text-4xl font-black text-white mb-1 tabular-nums">
                   {(pack.priceKobo / 100).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 })}
                 </p>
-                <p className="text-sm text-gray-500 mb-8">{pack.credits.toLocaleString()} credits</p>
+                <p className="text-sm text-gray-400 mb-8">{pack.credits.toLocaleString()} credits</p>
                 <ul className="space-y-3 mb-8 flex-1">
                   {['Question generation', 'Short-answer grading', 'Credits never expire'].map((line) => (
                     <li key={line} className="flex items-center gap-3 text-gray-300">

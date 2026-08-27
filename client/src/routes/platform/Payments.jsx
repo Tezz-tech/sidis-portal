@@ -61,7 +61,7 @@ export default function Payments() {
                 <Td mono>{new Date(p.createdAt).toLocaleDateString()}</Td>
                 <Td className="text-right">
                   {p.refundedAt ? (
-                    <span className="text-sm text-gray-500">Refunded</span>
+                    <span className="text-sm text-gray-400">Refunded</span>
                   ) : p.status === 'success' ? (
                     <Button variant="secondary" size="sm" onClick={() => setRefundTarget(p)}>Refund</Button>
                   ) : null}

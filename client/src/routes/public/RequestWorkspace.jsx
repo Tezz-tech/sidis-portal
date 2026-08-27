@@ -111,7 +111,7 @@ export default function RequestWorkspace() {
               className="space-y-5"
             >
               <h2 className="text-2xl font-black text-white mb-1">Request a workspace</h2>
-              <p className="text-sm text-gray-500 mb-6">Free to start. Set up takes less than a minute.</p>
+              <p className="text-sm text-gray-400 mb-6">Free to start. Set up takes less than a minute.</p>
 
               <Field label="Organization name" error={errors.organizationName?.message}>
                 <input className={fieldClasses} {...register('organizationName')} />
@@ -150,7 +150,7 @@ export default function RequestWorkspace() {
                 {isSubmitting ? 'Creating your workspace...' : 'Create my workspace'}
               </MarketingButton>
 
-              <p className="text-xs text-gray-500 text-center">
+              <p className="text-xs text-gray-400 text-center">
                 By continuing you agree to our{' '}
                 <Link to="/terms" className="text-gray-400 hover:text-orange-400 underline transition-colors duration-200">Terms</Link>
                 {' '}and{' '}

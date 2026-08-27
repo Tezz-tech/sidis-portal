@@ -61,7 +61,7 @@ export default function Participants() {
       </div>
 
       <div className="relative mb-4 max-w-xs">
-        <Search size={16} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <Search size={16} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <Input
           placeholder="Search by name or email"
           className="pl-9"
@@ -103,7 +103,7 @@ export default function Participants() {
                       type="button"
                       aria-label="Remove participant"
                       onClick={() => deleteMutation.mutate(p._id)}
-                      className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
+                      className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
                     >
                       <Trash2 size={16} strokeWidth={1.75} />
                     </button>

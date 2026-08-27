@@ -54,7 +54,7 @@ export default function LiveMonitor() {
                 <Tr key={row.invitationId}>
                   <Td>
                     <p className="text-white">{row.participant.firstName} {row.participant.lastName}</p>
-                    <p className="text-sm text-gray-500 font-mono">{row.participant.email}</p>
+                    <p className="text-sm text-gray-400 font-mono">{row.participant.email}</p>
                   </Td>
                   <Td><Badge variant={STATUS_VARIANT[row.attemptStatus]}>{STATUS_LABEL[row.attemptStatus]}</Badge></Td>
                   <Td numeric mono>{row.attemptStatus === 'in_progress' ? formatSeconds(row.secondsRemaining) : '—'}</Td>
@@ -64,7 +64,7 @@ export default function LiveMonitor() {
                         <AlertTriangle size={14} strokeWidth={1.75} /> {flags} event{flags === 1 ? '' : 's'}
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-500">—</span>
+                      <span className="text-sm text-gray-400">—</span>
                     )}
                   </Td>
                 </Tr>
