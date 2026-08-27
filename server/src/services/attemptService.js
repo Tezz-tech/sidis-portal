@@ -201,8 +201,24 @@ async function loadParticipantResult(session) {
   if (!attempt) throw new AppError('No attempt found', 404, 'NOT_FOUND');
   const { exam } = await loadContext(session);
 
-  if (attempt.status === 'submitted' && Date.now() - new Date(attempt.submittedAt).getTime() > GRADING_STUCK_THRESHOLD_MS) {
+  if (
+    attempt.status === 'submitted'
+    && !attempt.gradingFailedAt
+    && Date.now() - new Date(attempt.submittedAt).getTime() > GRADING_STUCK_THRESHOLD_MS
+  ) {
     runInBackground(() => processGradingJob(attempt._id.toString()), 'grading-retry');
+  }
+
+  if (attempt.status === 'submitted' && attempt.gradingFailedAt) {
+    return {
+      attempt,
+      exam,
+      result: {
+        status: 'submitted',
+        ready: false,
+        message: 'We hit a problem grading your exam. Your organizer has been notified and can retry.',
+      },
+    };
   }
 
   if (attempt.status !== 'graded') {

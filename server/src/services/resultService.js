@@ -4,6 +4,7 @@ const examService = require('./examService');
 const AppError = require('../utils/AppError');
 const { writeAuditLog } = require('./auditService');
 const { sweepOverdueAttempts } = require('./deadlineSweepService');
+const { processGradingJob } = require('./gradingService');
 
 async function listResults(tenant, examId, { status } = {}) {
   await examService.getExam(tenant, examId);
@@ -25,6 +26,7 @@ async function listResults(tenant, examId, { status } = {}) {
     gradedAt: a.gradedAt,
     hasLowConfidenceFlags: a.answers.some((ans) => ans.flaggedForReview),
     integrity: a.integrity,
+    gradingFailReason: a.gradingFailReason,
   }));
 }
 
@@ -69,8 +71,29 @@ async function getResultDetail(tenant, examId, attemptId) {
     submittedAt: attempt.submittedAt,
     gradedAt: attempt.gradedAt,
     integrity: attempt.integrity,
+    gradingFailReason: attempt.gradingFailReason,
     answers,
   };
+}
+
+async function retryGrading(tenant, examId, attemptId) {
+  const attempt = await scoped(Attempt, tenant).findOne({ _id: attemptId, exam: examId });
+  if (!attempt) throw new AppError('Result not found', 404, 'NOT_FOUND');
+  if (attempt.status !== 'submitted' || !attempt.gradingFailReason) {
+    throw new AppError('This result is not in a failed-grading state', 400, 'NOT_FAILED');
+  }
+
+  attempt.gradingClaimedAt = null;
+  attempt.gradingFailedAt = null;
+  attempt.gradingFailReason = null;
+  await attempt.save();
+
+  // Awaited, not fire-and-forget — this is an explicit, infrequent admin
+  // action, so the request should return a real success/fail answer rather
+  // than leaving the admin to guess by refreshing.
+  await processGradingJob(attemptId);
+
+  return getResultDetail(tenant, examId, attemptId);
 }
 
 async function overrideScore(tenant, examId, attemptId, { questionId, pointsAwarded, reason }, actorId) {
@@ -129,4 +152,4 @@ async function exportResultsCsv(tenant, examId) {
   return [header, ...rows].map((row) => row.map(toCsvValue).join(',')).join('\n');
 }
 
-module.exports = { listResults, getResultDetail, overrideScore, exportResultsCsv };
+module.exports = { listResults, getResultDetail, overrideScore, exportResultsCsv, retryGrading };

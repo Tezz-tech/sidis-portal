@@ -49,5 +49,6 @@ router.get('/:id/results', resultController.listResults);
 router.get('/:id/results/export', resultController.exportResultsCsv);
 router.get('/:id/results/:attemptId', resultController.getResultDetail);
 router.post('/:id/results/:attemptId/override', resultController.overrideScore);
+router.post('/:id/results/:attemptId/retry-grading', resultController.retryGrading);
 
 module.exports = router;

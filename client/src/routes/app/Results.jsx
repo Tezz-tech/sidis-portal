@@ -56,8 +56,8 @@ export default function Results() {
                   <p className="text-sm text-gray-500 font-mono">{r.participant.email}</p>
                 </Td>
                 <Td>
-                  <Badge variant={r.status === 'graded' ? 'neutral' : 'marker'}>
-                    {r.status === 'graded' ? 'Graded' : 'Grading'}
+                  <Badge variant={r.status === 'graded' ? 'neutral' : r.gradingFailReason ? 'fail' : 'marker'}>
+                    {r.status === 'graded' ? 'Graded' : r.gradingFailReason ? 'Grading failed' : 'Grading'}
                   </Badge>
                   {r.hasLowConfidenceFlags && (
                     <span className="inline-flex items-center gap-1 text-sm text-orange-400 ml-2">

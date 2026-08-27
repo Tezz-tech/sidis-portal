@@ -9,6 +9,12 @@ const logger = require('../config/logger');
 
 const LOW_CONFIDENCE_THRESHOLD = 0.7;
 
+// Mirrors generationWorker.js's STALE_CLAIM_MS. A claim older than this is
+// treated as abandoned (the execution that held it almost certainly died
+// mid-flight) and becomes reclaimable, so a failed/interrupted run doesn't
+// leave the attempt stuck at 'submitted' with no way to ever retry it.
+const GRADING_STALE_CLAIM_MS = 90 * 1000;
+
 function gradeObjectiveAnswer(answer, question) {
   const isCorrect = answer.selectedOptionKey != null && answer.selectedOptionKey === question.correctOptionKey;
   return { isCorrect, pointsAwarded: isCorrect ? question.points : 0 };
@@ -197,6 +203,29 @@ Participant's response: ${item.answer.textAnswer || '(no answer given)'}`)
 }
 
 async function processGradingJob(attemptId) {
+  // Atomic claim (mirrors Exam.generationClaimedAt in generationWorker.js):
+  // only one execution may ever reach the AI call for this attempt. Without
+  // this, the inline runInBackground call from finalizeSubmission, the
+  // queued 'grade-attempt' Agenda job (see jobs/gradingWorker.js — a
+  // supported persistent-worker deployment), and the stuck-attempt retry in
+  // attemptService.loadParticipantResult can all race and each trigger a
+  // separate paid AI grading call for the same attempt.
+  const claim = await Attempt.updateOne(
+    {
+      _id: attemptId,
+      status: 'submitted',
+      $or: [
+        { gradingClaimedAt: null },
+        { gradingClaimedAt: { $lte: new Date(Date.now() - GRADING_STALE_CLAIM_MS) } },
+      ],
+    },
+    { gradingClaimedAt: new Date() },
+  );
+  if (claim.matchedCount === 0) {
+    logger.warn({ attemptId }, 'Grading already claimed for this attempt — skipping duplicate run');
+    return;
+  }
+
   const attempt = await Attempt.findById(attemptId);
   if (!attempt || attempt.status !== 'submitted') return;
 
@@ -206,7 +235,14 @@ async function processGradingJob(attemptId) {
     results = await gradeShortAnswers(attempt, questions);
   } catch (err) {
     logger.error({ err, attemptId }, 'Short-answer grading failed');
-    throw err;
+    // Left as a terminal failure rather than re-thrown — the callers here
+    // (runInBackground, the Agenda job) have nothing to do with a thrown
+    // error but log it, which used to leave the attempt silently stuck at
+    // 'submitted' forever with no way for anyone to know it had failed.
+    attempt.gradingFailedAt = new Date();
+    attempt.gradingFailReason = err.message || 'Grading failed';
+    await attempt.save();
+    return;
   }
 
   const resultsByQuestion = new Map(results.map((r) => [r.questionId, r]));

@@ -40,4 +40,13 @@ async function exportResultsCsv(req, res, next) {
   }
 }
 
-module.exports = { listResults, getResultDetail, overrideScore, exportResultsCsv };
+async function retryGrading(req, res, next) {
+  try {
+    const result = await resultService.retryGrading(req.tenant, req.params.id, req.params.attemptId);
+    res.json({ result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { listResults, getResultDetail, overrideScore, exportResultsCsv, retryGrading };

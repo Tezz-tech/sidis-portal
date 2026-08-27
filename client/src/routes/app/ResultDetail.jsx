@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { AlertTriangle, Check, X, Pencil } from 'lucide-react';
+import { AlertTriangle, Check, X, Pencil, RefreshCw } from 'lucide-react';
 import api, { apiErrorMessage } from '../../lib/api';
 import Card from '../../components/console/Card';
 import Badge from '../../components/console/Badge';
@@ -37,6 +37,15 @@ export default function ResultDetail() {
     onError: (err) => setOverrideError(apiErrorMessage(err)),
   });
 
+  const retryGradingMutation = useMutation({
+    mutationFn: () => api.post(`/api/exams/${examId}/results/${attemptId}/retry-grading`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['result', examId, attemptId] });
+      toast.success('Grading retried');
+    },
+    onError: (err) => toast.error(apiErrorMessage(err)),
+  });
+
   const openOverride = (answer) => {
     setOverrideTarget(answer);
     setOverridePoints(answer.pointsAwarded);
@@ -68,11 +77,33 @@ export default function ResultDetail() {
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Result</p>
           {result.status === 'graded' ? (
             <Badge variant={result.passed ? 'pass' : 'fail'}>{result.passed ? 'Passed' : 'Failed'}</Badge>
+          ) : result.gradingFailReason ? (
+            <Badge variant="fail">Grading failed</Badge>
           ) : (
             <Badge variant="marker">Grading</Badge>
           )}
         </Card>
       </div>
+
+      {result.gradingFailReason && (
+        <Card className="mb-8 border-red-400/30 bg-red-400/5" animate={false}>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-2 text-red-300">
+              <AlertTriangle size={16} strokeWidth={1.75} className="shrink-0 mt-0.5" />
+              <p>Grading failed: {result.gradingFailReason}</p>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => retryGradingMutation.mutate()}
+              disabled={retryGradingMutation.isPending}
+            >
+              <RefreshCw size={14} strokeWidth={1.75} className={retryGradingMutation.isPending ? 'animate-spin' : ''} />
+              {retryGradingMutation.isPending ? 'Retrying...' : 'Retry grading'}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {integrityCount > 0 && (
         <Card className="mb-8 border-orange-400/30 bg-orange-400/5" animate={false}>

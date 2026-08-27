@@ -22,7 +22,7 @@ const attemptSchema = new Schema(
     organization: { type: Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
     exam: { type: Schema.Types.ObjectId, ref: 'Exam', required: true, index: true },
     participant: { type: Schema.Types.ObjectId, ref: 'Participant', required: true, index: true },
-    invitation: { type: Schema.Types.ObjectId, ref: 'Invitation', required: true },
+    invitation: { type: Schema.Types.ObjectId, ref: 'Invitation', required: true, index: true },
     status: {
       type: String,
       enum: ['in_progress', 'submitted', 'graded', 'expired'],
@@ -36,6 +36,15 @@ const attemptSchema = new Schema(
     serverDeadlineAt: { type: Date, required: true },
     submittedAt: { type: Date, default: null },
     gradedAt: { type: Date, default: null },
+    // Atomic claim (mirrors Exam.generationClaimedAt) so at most one
+    // execution of processGradingJob ever reaches the AI call for a given
+    // attempt — see gradingService.js. Left set (not cleared) on failure so
+    // a stale claim becomes reclaimable after GRADING_STALE_CLAIM_MS.
+    gradingClaimedAt: { type: Date, default: null },
+    // Set when grading fails terminally, so the participant/staff-facing
+    // retry logic stops silently re-attempting the same doomed call forever.
+    gradingFailedAt: { type: Date, default: null },
+    gradingFailReason: { type: String, default: null },
     answers: [answerSchema],
     score: { type: Number, default: 0 },
     percentage: { type: Number, default: 0 },
