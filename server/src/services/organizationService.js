@@ -73,6 +73,17 @@ async function createOrganization({ name, slug, type, adminEmail, adminFirstName
     throw new AppError('That workspace URL is already taken', 409, 'SLUG_TAKEN');
   }
 
+  // Email is only unique per-organization (see the compound index on User),
+  // not globally, so this wouldn't be caught by a database constraint —
+  // creating a second, unrelated account under an email that's already in
+  // use elsewhere just produces two disconnected identities under one
+  // address, which is confusing at best and can make login itself pick the
+  // wrong one. Check before creating anything, not after.
+  const existingEmail = await User.exists({ email: adminEmail.toLowerCase() });
+  if (existingEmail) {
+    throw new AppError('That email is already associated with an account. Sign in instead, or use a different email address.', 409, 'EMAIL_TAKEN');
+  }
+
   const org = await Organization.create({ name, slug, type });
 
   const inviteToken = randomToken();

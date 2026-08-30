@@ -7,6 +7,7 @@ import api, { apiErrorMessage } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
 import Input, { Label, FieldError, FieldHint } from '../../components/ui/Input';
+import sidisLogo from '../../assets/sidis-logo.png';
 
 const schema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -41,7 +42,9 @@ export default function AcceptInvite() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="font-display text-[20px] text-ink tracking-wide block text-center mb-8">SIDIS</Link>
+        <Link to="/" className="block text-center mb-8">
+          <img src={sidisLogo} alt="Sidis" className="h-9 w-auto mx-auto" />
+        </Link>
         <div className="bg-paper border border-rule rounded-card p-8">
           <h1 className="text-card-title text-ink mb-2">Set your password</h1>
           <p className="text-body text-graphite mb-6">Choose a password to finish setting up your account.</p>

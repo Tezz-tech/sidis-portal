@@ -77,4 +77,32 @@ describe('public "Request a workspace" self-serve signup', () => {
     const orgCount = await Organization.countDocuments({ name: 'No Contact Co' });
     expect(orgCount).toBe(0);
   });
+
+  // Email is only unique per-organization, not globally — without this
+  // check, resubmitting (or reusing an already-registered address) silently
+  // created a second, disconnected account under the same email at a new
+  // organization, which then made login itself pick the wrong one.
+  test('rejects a second workspace request for an email that already has an account, and creates nothing', async () => {
+    const first = await request(app).post('/api/public/leads').send({
+      organizationName: 'First Workspace',
+      firstName: 'Sam',
+      lastName: 'Taken',
+      email: 'sam@reused.test',
+    });
+    expect(first.status).toBe(201);
+
+    const second = await request(app).post('/api/public/leads').send({
+      organizationName: 'Second Workspace',
+      firstName: 'Sam',
+      lastName: 'Taken',
+      email: 'sam@reused.test',
+    });
+    expect(second.status).toBe(409);
+    expect(second.body.error.code).toBe('EMAIL_TAKEN');
+
+    const orgCount = await Organization.countDocuments({ name: 'Second Workspace' });
+    expect(orgCount).toBe(0);
+    const userCount = await User.countDocuments({ email: 'sam@reused.test' });
+    expect(userCount).toBe(1);
+  });
 });

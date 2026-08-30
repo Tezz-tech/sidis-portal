@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import MarketingButton from './marketing/MarketingButton';
+import sidisLogo from '../../assets/sidis-logo.png';
 
 const NAV_LINKS = [
   { to: '/pricing', label: 'Pricing' },
@@ -20,9 +21,7 @@ export default function PublicLayout() {
         <header className="sticky top-0 z-50 bg-gradient-to-r from-gray-950 via-gray-900 to-black backdrop-blur-xl bg-opacity-90 border-b border-orange-500/20 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <Link to="/" className="group flex items-center">
-              <span className="text-2xl font-black text-white transition-transform duration-300 group-hover:scale-110">
-                Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-              </span>
+              <img src={sidisLogo} alt="Sidis" className="h-9 w-auto transition-transform duration-300 group-hover:scale-110" />
             </Link>
 
             <nav className="hidden md:flex items-center gap-10">
@@ -88,9 +87,7 @@ export default function PublicLayout() {
         <footer className="bg-gradient-to-t from-black via-gray-950 to-gray-900 border-t border-orange-500/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid sm:grid-cols-2 md:grid-cols-4 gap-10">
             <div className="md:col-span-2">
-              <p className="text-2xl font-black text-white mb-3">
-                Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-              </p>
+              <img src={sidisLogo} alt="Sidis" className="h-9 w-auto mb-4" />
               <p className="text-gray-400 text-sm max-w-xs leading-relaxed">
                 Turn a document into a finished, gradeable exam in minutes — powered by AI, built for real assessments.
               </p>

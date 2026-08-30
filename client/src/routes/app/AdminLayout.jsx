@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, FileText, ClipboardList, Users, CreditCard, UserPlus, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import sidisLogo from '../../assets/sidis-logo.png';
 
 const NAV_ITEMS = [
   { to: '/app', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -27,9 +28,7 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-950 via-black to-gray-950">
       <div className="md:hidden fixed top-0 inset-x-0 z-40 h-16 flex items-center justify-between px-4 bg-white/5 backdrop-blur-2xl border-b border-white/10">
-        <span className="text-lg font-black text-white tracking-tight">
-          Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-        </span>
+        <img src={sidisLogo} alt="Sidis" className="h-8 w-auto" />
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
@@ -54,9 +53,7 @@ export default function AdminLayout() {
         } md:translate-x-0`}
       >
         <div className="h-16 flex items-center px-6">
-          <span className="text-lg font-black text-white tracking-tight">
-            Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-          </span>
+          <img src={sidisLogo} alt="Sidis" className="h-8 w-auto" />
         </div>
         <nav className="flex-1 px-3 py-2 space-y-1">
           {NAV_ITEMS.map((item) => (

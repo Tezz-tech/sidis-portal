@@ -9,6 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { apiErrorMessage } from '../../lib/api';
 import MarketingButton from './marketing/MarketingButton';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import sidisLogo from '../../assets/sidis-logo.png';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -42,9 +43,7 @@ export default function Login() {
       <section className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <Link to="/" className="block text-center mb-10">
-            <span className="text-2xl font-black text-white">
-              Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-            </span>
+            <img src={sidisLogo} alt="Sidis" className="h-9 w-auto mx-auto" />
           </Link>
 
           <motion.div

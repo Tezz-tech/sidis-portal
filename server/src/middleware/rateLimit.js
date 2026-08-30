@@ -1,10 +1,20 @@
 const rateLimit = require('express-rate-limit');
 
+// Every limiter below shares one in-memory store per process, which
+// persists for the whole test run — Jest requires src/app.js once and
+// every test file reuses that cached module, so request counts from
+// earlier test files carry over into later ones. Tests need deterministic,
+// unthrottled behavior, so rate limiting is entirely skipped under
+// NODE_ENV=test (set in tests/globalSetup.js) rather than production
+// behavior depending on however many requests happened to run before it.
+const skipInTests = () => process.env.NODE_ENV === 'test';
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req) => `${req.ip}:${(req.body?.email || '').toLowerCase()}`,
   message: { error: { message: 'Too many sign-in attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' } },
 });
@@ -14,6 +24,7 @@ const otpRequestLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req) => `${req.ip}:${(req.body?.email || '').toLowerCase()}`,
   message: { error: { message: 'Too many code requests. Try again in 10 minutes.', code: 'RATE_LIMITED' } },
 });
@@ -26,6 +37,7 @@ const otpVerifyLimiter = rateLimit({
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req) => `${req.ip}:${req.params?.token || ''}`,
   message: { error: { message: 'Too many attempts. Request a new code and try again.', code: 'RATE_LIMITED' } },
 });
@@ -39,6 +51,7 @@ const passwordResetLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req) => `${req.ip}:${(req.body?.email || req.body?.token || '').toLowerCase()}`,
   message: { error: { message: 'Too many attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' } },
 });
@@ -48,6 +61,7 @@ const apiLimiter = rateLimit({
   limit: 120,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
 });
 
 // Request Workspace creates a real organization + admin account immediately
@@ -58,6 +72,7 @@ const leadLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTests,
   keyGenerator: (req) => req.ip,
   message: { error: { message: 'Too many workspace requests from this network. Try again later.', code: 'RATE_LIMITED' } },
 });

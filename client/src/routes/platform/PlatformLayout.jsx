@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Building2, Tag, Receipt, ScrollText, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import sidisLogo from '../../assets/sidis-logo.png';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Organizations', icon: Building2, end: true },
@@ -25,9 +26,7 @@ export default function PlatformLayout() {
     <div className="min-h-screen flex bg-gradient-to-br from-gray-950 via-black to-gray-950">
       <div className="md:hidden fixed top-0 inset-x-0 z-40 h-16 flex items-center justify-between px-4 bg-white/5 backdrop-blur-2xl border-b border-white/10">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-black text-white tracking-tight">
-            Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-          </span>
+          <img src={sidisLogo} alt="Sidis" className="h-8 w-auto" />
           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">platform</span>
         </div>
         <button
@@ -54,9 +53,7 @@ export default function PlatformLayout() {
         } md:translate-x-0`}
       >
         <div className="h-16 flex items-center gap-2 px-6">
-          <span className="text-lg font-black text-white tracking-tight">
-            Sidis<span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">.</span>
-          </span>
+          <img src={sidisLogo} alt="Sidis" className="h-8 w-auto" />
           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">platform</span>
         </div>
         <nav className="flex-1 px-3 py-2 space-y-1">
